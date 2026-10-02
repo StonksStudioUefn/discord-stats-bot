@@ -40,13 +40,15 @@ from database import (
     listar_pendientes,
     quitar_pendiente,
 )
-from formatting import format_value, parse_abbrev
+from formatting import format_value, parse_value
 from games import (
     GAMES,
     LEADERBOARD_CHANNEL,
     SUBMIT_CHANNEL,
     game_enabled,
     get_game_by_island_code,
+    stat_field,
+    stat_lower_is_better,
 )
 from gemini_service import GeminiTransientError, extract_stats_from_image
 from widget_site import generar_widgets_json
@@ -104,7 +106,7 @@ REJECT_REASONS = {
     ),
     "stats_unreadable": (
         "I detected the card but couldn't read any of the statistics. "
-        "Make sure the **income** and **cash** values are clearly visible "
+        "Make sure the **stats** on the card are clearly visible "
         "and not blurry."
     ),
     "gemini_error": (
@@ -127,6 +129,21 @@ def _build_rejection(message: "discord.Message", reason_key: str) -> tuple[str, 
     )
     # allowed_mentions explícito: garantizamos que SÍ se notifica al usuario.
     return contenido, discord.AllowedMentions(users=True, roles=False, everyone=False)
+
+
+# Modo silencioso (input 'silencioso' del workflow -> SILENCIOSO=true):
+# los rechazos/errores NO se publican en Discord, solo se ven en el log.
+# Las confirmaciones de capturas procesadas bien sí se publican.
+SILENCIOSO = os.environ.get("SILENCIOSO", "").strip().lower() in ("1", "true", "yes", "si", "sí")
+
+
+async def _rechazar(message: "discord.Message", reason_key: str) -> None:
+    """Responde al jugador con el motivo del rechazo (salvo en modo silencioso)."""
+    if SILENCIOSO:
+        print(f"[SILENCIO] msg {message.id}: rechazo '{reason_key}' no publicado.")
+        return
+    contenido, am = _build_rejection(message, reason_key)
+    await message.reply(contenido, allowed_mentions=am)
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -188,28 +205,24 @@ async def _procesar_mensaje(message: discord.Message) -> str | None:
         raise
     except Exception as error:
         print(f"[WARN] msg {message.id}: error definitivo en Gemini: {error}")
-        contenido, am = _build_rejection(message, "gemini_error")
-        await message.reply(contenido, allowed_mentions=am)
+        await _rechazar(message, "gemini_error")
         return None
 
     if not stats.get("stats_detected"):
-        contenido, am = _build_rejection(message, "not_a_stats_card")
-        await message.reply(contenido, allowed_mentions=am)
+        await _rechazar(message, "not_a_stats_card")
         return None
 
     # 2) Identificar el juego por el código de isla.
     codigo_leido = stats.get("island_code", "")
     if not _tiene_parentesis(codigo_leido):
         print(f"[INFO] msg {message.id}: código sin paréntesis ('{codigo_leido}'). Rechazada.")
-        contenido, am = _build_rejection(message, "island_code_unreadable")
-        await message.reply(contenido, allowed_mentions=am)
+        await _rechazar(message, "island_code_unreadable")
         return None
 
     juego = get_game_by_island_code(codigo_leido)
     if juego is None:
         print(f"[INFO] msg {message.id}: código '{codigo_leido}' no corresponde a ningún juego configurado.")
-        contenido, am = _build_rejection(message, "island_code_unknown")
-        await message.reply(contenido, allowed_mentions=am)
+        await _rechazar(message, "island_code_unknown")
         return None
 
     game_key, game_config = juego
@@ -240,8 +253,7 @@ async def _procesar_mensaje(message: discord.Message) -> str | None:
             f"(leído '{nombre_leido}', "
             f"name_fully_visible={nombre_visible}). Rechazada."
         )
-        contenido, am = _build_rejection(message, "name_unreadable")
-        await message.reply(contenido, allowed_mentions=am)
+        await _rechazar(message, "name_unreadable")
         return None
 
     # 3) Guardar cada stat del juego que tenga valor leído.
@@ -250,8 +262,9 @@ async def _procesar_mensaje(message: discord.Message) -> str | None:
     lineas_resumen: list[str] = []
 
     for stat_key, stat_info in game_config["stats"].items():
-        valor_crudo = stats.get(stat_key, "")
-        valor = parse_abbrev(valor_crudo)
+        fmt = stat_info.get("format", "raw")
+        valor_crudo = stats.get(stat_field(stat_key, stat_info), "")
+        valor = parse_value(valor_crudo, fmt)
         if valor <= 0:
             continue
 
@@ -267,12 +280,12 @@ async def _procesar_mensaje(message: discord.Message) -> str | None:
                 stat=stat_key,
                 value=valor,
                 is_vip=es_vip,
+                lower_is_better=stat_lower_is_better(stat_info),
             )
         except Exception as error:
             print(f"[ERROR] {game_key}/{stat_key}: fallo al guardar: {error}")
             continue
 
-        fmt = stat_info.get("format", "raw")
         emoji = stat_info.get("emoji", "📊")
         valor_fmt = format_value(valor, fmt)
         estado = resultado["estado"]
@@ -294,8 +307,7 @@ async def _procesar_mensaje(message: discord.Message) -> str | None:
             )
 
     if not lineas_resumen:
-        contenido, am = _build_rejection(message, "stats_unreadable")
-        await message.reply(contenido, allowed_mentions=am)
+        await _rechazar(message, "stats_unreadable")
         return None
 
     cabecera = (
@@ -307,6 +319,22 @@ async def _procesar_mensaje(message: discord.Message) -> str | None:
         mention_author=False,
     )
     return game_key
+
+
+def _ids_a_reprocesar() -> list[str]:
+    """
+    IDs de mensajes que un moderador pide reprocesar a mano (input
+    'reprocesar' del workflow -> variable REPROCESAR). Acepta IDs o
+    enlaces de Discord separados por comas, espacios o saltos de línea;
+    de cada enlace se queda con el último número (el ID del mensaje).
+    """
+    crudo = os.environ.get("REPROCESAR", "")
+    ids = []
+    for trozo in crudo.replace(",", " ").split():
+        ultimo = trozo.rstrip("/").split("/")[-1]
+        if ultimo.isdigit():
+            ids.append(ultimo)
+    return ids
 
 
 # Nº máximo de pasadas (ejecuciones) que reintentamos una captura en cola
@@ -357,9 +385,8 @@ async def _procesar_cola_pendientes(
                     f"[QUEUE] msg {message_id} agotó {MAX_PASADAS_PENDIENTE} "
                     f"pasadas; aviso al usuario y lo saco de la cola."
                 )
-                contenido, am = _build_rejection(message, "gemini_error")
                 try:
-                    await message.reply(contenido, allowed_mentions=am)
+                    await _rechazar(message, "gemini_error")
                 except discord.HTTPException:
                     pass
                 await quitar_pendiente(message_id)
@@ -399,7 +426,10 @@ async def _construir_embed(game_key: str, game_config: dict) -> discord.Embed:
         emoji = stat_info.get("emoji", "📊")
         titulo = stat_info.get("title", stat_key.upper())
 
-        top = await obtener_top(game_key, stat_key, limit=game_config["top_size"])
+        top = await obtener_top(
+            game_key, stat_key, limit=game_config["top_size"],
+            ascending=stat_lower_is_better(stat_info),
+        )
         if not top:
             cuerpo = "_No records yet._"
         else:
@@ -505,6 +535,11 @@ async def on_ready():
         #     fallaron por errores transitorios de Gemini en pasadas
         #     anteriores). Se reintentan hasta MAX_PASADAS_PENDIENTE veces.
         juegos_tocados: set[str] = set()
+        # Capturas pedidas a mano (p. ej. rechazadas antes de configurar
+        # su juego): se meten en la cola para procesarlas ahora mismo.
+        for mid in _ids_a_reprocesar():
+            print(f"[QUEUE] msg {mid} añadida a mano para reprocesar.")
+            await añadir_pendiente(mid, intentos=1)
         await _procesar_cola_pendientes(c_submit, juegos_tocados)
 
         # --- Procesar cada captura NUEVA y trackear qué juegos refrescar ---

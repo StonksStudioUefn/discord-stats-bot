@@ -140,6 +140,54 @@ def format_income(valor: int) -> str:
     return f"${format_abbrev(valor)}/s"
 
 
+def parse_time(texto: str) -> int:
+    """
+    Convierte un tiempo del juego en SEGUNDOS totales.
+
+    El juego omite las partes que valen cero por la izquierda:
+        '1:02:03' -> 3723   (horas:minutos:segundos)
+        '14:20'   -> 860    (minutos:segundos)
+        '45'      -> 45     (solo segundos)
+
+    Si trae decimales en los segundos ('14:20.5') se descartan.
+    Si no puede interpretarlo, devuelve 0 (igual que parse_abbrev).
+    """
+    if texto is None:
+        return 0
+    s = str(texto).strip().replace(" ", "")
+    if not s:
+        return 0
+
+    partes = s.split(":")
+    if len(partes) > 3:
+        return 0
+
+    total = 0
+    for parte in partes:
+        # Solo nos quedamos con la parte entera ('20.5' -> '20').
+        entero = parte.split(".")[0].split(",")[0]
+        if not entero.isdigit():
+            return 0
+        total = total * 60 + int(entero)
+    return total
+
+
+def format_time(segundos: int) -> str:
+    """
+    Segundos -> texto como en el juego: '1:02:03', '14:20'.
+    Si solo hay segundos se muestra '0:45' (para que no parezca un
+    número suelto en la leaderboard).
+    """
+    if segundos is None:
+        return "0:00"
+    n = max(int(segundos), 0)
+    horas, resto = divmod(n, 3600)
+    minutos, segs = divmod(resto, 60)
+    if horas:
+        return f"{horas}:{minutos:02d}:{segs:02d}"
+    return f"{minutos}:{segs:02d}"
+
+
 # Mapa de "formatters" disponibles por nombre, para usar desde games.py.
 # Añade aquí nuevos formatos si en otro juego los necesitas.
 FORMATTERS = {
@@ -147,7 +195,21 @@ FORMATTERS = {
     "income": format_income,    # $1.2Qa/s
     "plain": format_abbrev,     # 1.2Qa  (sin símbolo)
     "raw": lambda v: f"{int(v):,}",  # 1,200,000  (entero formateado)
+    "integer": lambda v: str(int(v)),  # 1200000  (entero sin formato)
+    "time": format_time,        # 1:02:03 / 14:20  (tiempo en segundos)
 }
+
+# Formatos cuyo valor NO usa los sufijos del juego al leerse.
+# El resto se interpreta con parse_abbrev.
+PARSERS = {
+    "time": parse_time,
+}
+
+
+def parse_value(texto: str, formatter_name: str) -> int:
+    """Interpreta el texto leído según el formato de la stat."""
+    fn = PARSERS.get(formatter_name, parse_abbrev)
+    return fn(texto)
 
 
 def format_value(valor: int, formatter_name: str) -> str:
