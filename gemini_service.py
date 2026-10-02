@@ -9,8 +9,8 @@ identifica DESPUÉS leyendo el código de isla de la imagen, ya no podemos
 construir el esquema "para el juego X" antes de la llamada.
 
 Solución: construimos un esquema UNIVERSAL que pide las stats de TODOS
-los juegos configurados (income, cash, etc.). Como en tu caso todos
-comparten income+cash, una sola llamada cubre cualquier juego.
+los juegos activos (income, cash, wins, hay, best_time...). Una sola
+llamada cubre cualquier juego; las stats que no salen vienen vacías.
 
 Una llamada típica devuelve:
     {
@@ -34,7 +34,13 @@ from google.genai import types
 from pydantic import BaseModel, Field, create_model
 
 from config import GEMINI_API_KEY, GEMINI_MODEL
-from games import GAMES, ISLAND_CODE_DESC, NOMBRE_JUGADOR_DESC
+from games import (
+    GAMES,
+    ISLAND_CODE_DESC,
+    NOMBRE_JUGADOR_DESC,
+    game_enabled,
+    stat_field,
+)
 
 _client = genai.Client(api_key=GEMINI_API_KEY)
 
@@ -65,20 +71,62 @@ def _es_error_transitorio(error: Exception) -> bool:
     return any(k in nombre for k in ("timeout", "connection", "unavailable"))
 
 
-def _stats_union() -> dict[str, str]:
+def _stats_union() -> dict[str, tuple[str, str]]:
     """
-    Devuelve {stat_key: descripcion} con la UNIÓN de las stats de todos
-    los juegos. Si dos juegos comparten una stat con descripciones
-    distintas, se conserva la primera (debería ser igual de todos modos).
+    Devuelve {campo_gemini: (descripcion, formato)} con la UNIÓN de las
+    stats de todos los juegos ACTIVOS (los desactivados se ignoran al
+    leer la captura, así que no hace falta pedírselas a Gemini).
+    Si dos juegos comparten campo, se conserva el primero; si además
+    la descripción es distinta, se avisa: usa 'field' en games.py para
+    separarlos.
     """
-    union: dict[str, str] = {}
+    union: dict[str, tuple[str, str]] = {}
     for cfg in GAMES.values():
+        if not game_enabled(cfg):
+            continue
         for stat_key, info in cfg["stats"].items():
-            if stat_key in union:
-                continue
+            campo = stat_field(stat_key, info)
             desc = info["desc"] if isinstance(info, dict) else info
-            union[stat_key] = desc
+            fmt = info.get("format", "raw") if isinstance(info, dict) else "raw"
+            if campo in union:
+                if union[campo][0] != desc:
+                    print(
+                        f"[WARN] El campo '{campo}' tiene descripciones "
+                        f"distintas en varios juegos; uso la primera. "
+                        f"Ponle 'field' propio en games.py."
+                    )
+                continue
+            union[campo] = (desc, fmt)
     return union
+
+
+# Instrucciones de "cómo devolver el valor" según el formato de la stat.
+_INSTRUCCIONES_SUFIJO = (
+    "Devuelve el valor EXACTAMENTE como aparece en la "
+    "captura, conservando el sufijo de magnitud del "
+    "juego (K, M, B, T, Qa, Qi, Sx, Sp, Oc, No, Dc, "
+    "Un, Du, Tr, Qt, Qn, Se, St, Og, Nn, Vg, UVg). "
+    "Ejemplos válidos: '1.2K', '45.7M', '3.14Qa'. NO "
+    "incluyas '$', '/s', comas ni espacios: solo "
+    "número y, opcionalmente, sufijo. Si esta "
+    "estadística no es visible en la captura, "
+    "devuelve cadena vacía."
+)
+_INSTRUCCIONES_POR_FORMATO = {
+    "time": (
+        "Devuelve el tiempo EXACTAMENTE como aparece, con sus "
+        "dos puntos ':' (ejemplos: '1:02:03', '14:20', '45'). "
+        "NO lo conviertas a segundos ni añadas partes que no "
+        "salen. Si esta estadística no es visible en la "
+        "captura, devuelve cadena vacía."
+    ),
+    "integer": (
+        "Devuelve SOLO los dígitos del número entero, sin "
+        "espacios ni separadores (ejemplos: '37', '1250'). "
+        "Si esta estadística no es visible en la captura, "
+        "devuelve cadena vacía."
+    ),
+}
 
 
 def _construir_esquema_universal() -> type[BaseModel]:
@@ -137,23 +185,11 @@ def _construir_esquema_universal() -> type[BaseModel]:
         ),
     }
 
-    for stat_key, stat_desc in _stats_union().items():
-        campos[stat_key] = (
+    for campo, (stat_desc, fmt) in _stats_union().items():
+        instrucciones = _INSTRUCCIONES_POR_FORMATO.get(fmt, _INSTRUCCIONES_SUFIJO)
+        campos[campo] = (
             str,
-            Field(
-                description=(
-                    f"{stat_desc}\n\n"
-                    f"Devuelve el valor EXACTAMENTE como aparece en la "
-                    f"captura, conservando el sufijo de magnitud del "
-                    f"juego (K, M, B, T, Qa, Qi, Sx, Sp, Oc, No, Dc, "
-                    f"Un, Du, Tr, Qt, Qn, Se, St, Og, Nn, Vg, UVg). "
-                    f"Ejemplos válidos: '1.2K', '45.7M', '3.14Qa'. NO "
-                    f"incluyas '$', '/s', comas ni espacios: solo "
-                    f"número y, opcionalmente, sufijo. Si esta "
-                    f"estadística no es visible en la captura, "
-                    f"devuelve cadena vacía."
-                )
-            ),
+            Field(description=f"{stat_desc}\n\n{instrucciones}"),
         )
 
     return create_model("UniversalStats", **campos)
@@ -165,7 +201,7 @@ _ESQUEMA = _construir_esquema_universal()
 
 _PROMPT = (
     "Eres un sistema de visión artificial analizando una captura de "
-    "pantalla de un juego de Fortnite Creative ('Brainrots').\n\n"
+    "pantalla de un juego de Fortnite Creative.\n\n"
     "Tu objetivo es extraer los datos del jugador DESDE LA TARJETA "
     "negra titulada 'LIFETIME STATS' (la que tiene borde arcoíris y "
     "muestra el avatar del jugador a la izquierda). Necesitas: "
@@ -207,7 +243,10 @@ _PROMPT = (
     "  Errores típicos a EVITAR:\n"
     "    '$28 Oc/s'  ->  '280'    (MAL: te has comido el sufijo 'Oc')\n"
     "    '$1.2 Sx'   ->  '12'     (MAL: te has comido el sufijo y el punto)\n"
-    "    '$5 No'     ->  '5'      (MAL: te has comido el sufijo 'No')\n\n"
+    "    '$5 No'     ->  '5'      (MAL: te has comido el sufijo 'No')\n"
+    "  EXCEPCIONES: los TIEMPOS (con ':', como '14:20') y los números "
+    "  ENTEROS sin sufijo se devuelven como indique la descripción de "
+    "  su campo; NO les añadas sufijo.\n\n"
     "OTRAS REGLAS:\n"
     "- Sigue al pie de la letra las descripciones de cada campo del "
     "esquema JSON.\n"

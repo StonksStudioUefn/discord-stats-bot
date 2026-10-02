@@ -21,6 +21,9 @@ Cada juego se describe con:
   - color:         entero RGB para el borde del embed (ej. 0xFF3355).
   - player_name_description: pista para Gemini sobre el nombre del jugador.
   - stats:         diccionario {clave_interna: {desc, format, emoji, title}}.
+                   Opcionales: 'lower_is_better' (ranking ascendente,
+                   p. ej. tiempos) y 'field' (nombre del campo de Gemini
+                   si choca con otra stat de igual clave).
   - top_size:      cuántos jugadores muestra cada ranking.
 
 Para añadir un juego nuevo: copia un bloque y modifícalo.
@@ -143,6 +146,87 @@ STATS_SPEED_WINS = {
     },
 }
 
+# Stats de "Find The Needle": WINS, HAY COLLECTED y BEST TIME.
+# - wins: mismo formato que siempre (número con sufijos del juego).
+#   Usa el campo de Gemini 'needle_wins' para no chocar con la
+#   descripción de 'wins' de Keyboard Escape si se reactiva.
+# - hay:  número con sufijos del juego (1.2K, 45M...), sin '$'.
+# - best_time: tiempo en H:MM:SS / M:SS / S. Se guarda en SEGUNDOS y
+#   el ranking es ASCENDENTE (menos tiempo = mejor), por eso lleva
+#   'lower_is_better': True.
+STATS_FIND_THE_NEEDLE = {
+    "wins": {
+        "field": "needle_wins",
+        "desc": (
+            "Número en TEXTO AMARILLO etiquetado 'WINS' DENTRO de la "
+            "tarjeta negra titulada 'LIFETIME STATS' (la del medio, con "
+            "borde arcoíris y el avatar del jugador a la izquierda). "
+            "Puede tener DOS partes separadas por un ESPACIO: dígitos y "
+            "sufijo (ejemplo: '1 K', '500', '2.5 M'). NO lleva el "
+            "símbolo '$' delante.\n"
+            "Si DENTRO de la tarjeta hubiera por error más de un valor "
+            "candidato a 'WINS', escoge el MÁS ALTO. "
+            f"Sufijos posibles: {SUFIJOS_DEL_JUEGO}."
+        ),
+        "format": "plain",
+        "emoji": "🏆",
+        "title": "MOST WINS",
+        "widget_color": (1.0, 0.8705882, 0.1254902),  # amarillo
+    },
+    "hay": {
+        "desc": (
+            "Número en TEXTO NARANJA etiquetado 'HAY COLLECTED' DENTRO "
+            "de la tarjeta negra titulada 'LIFETIME STATS' (la del "
+            "medio, con borde arcoíris y el avatar del jugador a la "
+            "izquierda). Puede tener DOS partes separadas por un "
+            "ESPACIO: dígitos y sufijo (ejemplo: '8.2 K', '1.5 M', "
+            "'125'). Si lleva el símbolo '$' delante, ignóralo.\n"
+            "Si DENTRO de la tarjeta hubiera por error más de un valor "
+            "candidato a 'HAY COLLECTED', escoge el MÁS ALTO. "
+            f"Sufijos posibles: {SUFIJOS_DEL_JUEGO}."
+        ),
+        "format": "plain",
+        "emoji": "🌾",
+        "title": "MOST HAY",
+        "widget_color": (1.0, 0.5490196, 0.0),  # naranja
+    },
+    "best_time": {
+        "desc": (
+            "Tiempo en TEXTO AZUL etiquetado 'BEST TIME' DENTRO de la "
+            "tarjeta negra titulada 'LIFETIME STATS' (la del medio, con "
+            "borde arcoíris y el avatar del jugador a la izquierda). "
+            "Es un TIEMPO con el formato horas:minutos:segundos, pero "
+            "el juego OMITE las horas y los minutos cuando valen cero: "
+            "'1:02:03' (1 h 2 min 3 s), '14:20' (14 min 20 s), '45' "
+            "(45 s). NO es un número con sufijo."
+        ),
+        "format": "time",
+        "lower_is_better": True,
+        "emoji": "⏱️",
+        "title": "BEST TIME",
+        "widget_color": (0.0, 0.6, 1.0),  # azul
+    },
+}
+
+# Stats de "Color The Meme". De momento solo COMPLETED PAINTINGS.
+# Añadir más stats en el futuro NO rompe nada: cada stat se guarda en
+# su propia fila, así que los envíos antiguos solo tendrán esta.
+STATS_COLOR_THE_MEME = {
+    "paintings": {
+        "desc": (
+            "Número en TEXTO AZUL etiquetado 'COMPLETED PAINTINGS' "
+            "DENTRO de la tarjeta negra titulada 'LIFETIME STATS' (la "
+            "del medio, con borde arcoíris y el avatar del jugador a la "
+            "izquierda). Es un número ENTERO sin sufijo de magnitud "
+            "(ejemplo: '37', '1250')."
+        ),
+        "format": "integer",
+        "emoji": "🖼️",
+        "title": "MOST PAINTINGS",
+        "widget_color": (0.0, 0.6, 1.0),  # azul
+    },
+}
+
 # Descripción común del nombre del jugador.
 NOMBRE_JUGADOR_DESC = (
     "Texto blanco que aparece debajo de la imagen de perfil (avatar) "
@@ -220,6 +304,34 @@ GAMES: dict[str, dict] = {
     },
 
     # ------------------------------------------------------------------
+    # FIND THE NEEDLE
+    # ------------------------------------------------------------------
+    "find_the_needle": {
+        "display_name": "Find The Needle",
+        "emoji": "🪡",
+        "island_code": "8541-5086-2780",
+        "color": 0xE8A33D,  # dorado paja (heno)
+        "uefn_project": "MT_FindTheNeedle",  # TODO: confirmar nombre real
+        "player_name_description": NOMBRE_JUGADOR_DESC,
+        "stats": STATS_FIND_THE_NEEDLE,
+        "top_size": 10,
+    },
+
+    # ------------------------------------------------------------------
+    # COLOR THE MEME
+    # ------------------------------------------------------------------
+    "color_the_meme": {
+        "display_name": "Color The Meme",
+        "emoji": "🎨",
+        "island_code": "5261-2224-6992",
+        "color": 0xFF66CC,  # rosa (pintura)
+        "uefn_project": "MT_ColorTheMeme",  # TODO: confirmar nombre real
+        "player_name_description": NOMBRE_JUGADOR_DESC,
+        "stats": STATS_COLOR_THE_MEME,
+        "top_size": 10,
+    },
+
+    # ------------------------------------------------------------------
     # PLANTILLA PARA AÑADIR UN JUEGO NUEVO (copia y modifica)
     # ------------------------------------------------------------------
     # "mi_juego": {
@@ -257,6 +369,20 @@ def get_game_by_island_code(island_code: str) -> tuple[str, dict] | None:
         if _normalizar_codigo(cfg.get("island_code", "")) == objetivo:
             return key, cfg
     return None
+
+
+def stat_field(stat_key: str, stat_info: dict) -> str:
+    """
+    Nombre del campo que Gemini rellena para esta stat. Por defecto es
+    la propia clave; 'field' permite separar dos stats con la misma
+    clave pero distinta descripción en juegos diferentes.
+    """
+    return stat_info.get("field", stat_key)
+
+
+def stat_lower_is_better(stat_info: dict) -> bool:
+    """True si en esta stat gana el valor MÁS BAJO (p. ej. tiempos)."""
+    return bool(stat_info.get("lower_is_better", False))
 
 
 def game_enabled(game_config: dict) -> bool:
