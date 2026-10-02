@@ -148,31 +148,34 @@ STATS_SPEED_WINS = {
 
 # Stats de "Find The Needle": WINS, HAY COLLECTED y BEST TIME.
 # - wins: mismo formato que siempre (número con sufijos del juego).
-#   Usa el campo de Gemini 'needle_wins' para no chocar con la
-#   descripción de 'wins' de Keyboard Escape si se reactiva.
 # - hay:  número con sufijos del juego (1.2K, 45M...), sin '$'.
 # - best_time: tiempo en H:MM:SS / M:SS / S. Se guarda en SEGUNDOS y
 #   el ranking es ASCENDENTE (menos tiempo = mejor), por eso lleva
 #   'lower_is_better': True.
+# WINS de la tarjeta, compartida por Find The Needle y Color The Meme
+# (misma etiqueta y color). Campo de Gemini propio ("card_wins") para
+# no chocar con la descripción de "wins" de Keyboard Escape.
+STAT_WINS_TARJETA = {
+    "field": "card_wins",
+    "desc": (
+        "Número en TEXTO AMARILLO etiquetado 'WINS' DENTRO de la "
+        "tarjeta negra titulada 'LIFETIME STATS' (la del medio, con "
+        "borde arcoíris y el avatar del jugador a la izquierda). "
+        "Puede tener DOS partes separadas por un ESPACIO: dígitos y "
+        "sufijo (ejemplo: '1 K', '500', '2.5 M'). NO lleva el "
+        "símbolo '$' delante.\n"
+        "Si DENTRO de la tarjeta hubiera por error más de un valor "
+        "candidato a 'WINS', escoge el MÁS ALTO. "
+        f"Sufijos posibles: {SUFIJOS_DEL_JUEGO}."
+    ),
+    "format": "plain",
+    "emoji": "🏆",
+    "title": "MOST WINS",
+    "widget_color": (1.0, 0.8705882, 0.1254902),  # amarillo
+}
+
 STATS_FIND_THE_NEEDLE = {
-    "wins": {
-        "field": "needle_wins",
-        "desc": (
-            "Número en TEXTO AMARILLO etiquetado 'WINS' DENTRO de la "
-            "tarjeta negra titulada 'LIFETIME STATS' (la del medio, con "
-            "borde arcoíris y el avatar del jugador a la izquierda). "
-            "Puede tener DOS partes separadas por un ESPACIO: dígitos y "
-            "sufijo (ejemplo: '1 K', '500', '2.5 M'). NO lleva el "
-            "símbolo '$' delante.\n"
-            "Si DENTRO de la tarjeta hubiera por error más de un valor "
-            "candidato a 'WINS', escoge el MÁS ALTO. "
-            f"Sufijos posibles: {SUFIJOS_DEL_JUEGO}."
-        ),
-        "format": "plain",
-        "emoji": "🏆",
-        "title": "MOST WINS",
-        "widget_color": (1.0, 0.8705882, 0.1254902),  # amarillo
-    },
+    "wins": STAT_WINS_TARJETA,
     "hay": {
         "desc": (
             "Número en TEXTO NARANJA etiquetado 'HAY COLLECTED' DENTRO "
@@ -208,10 +211,12 @@ STATS_FIND_THE_NEEDLE = {
     },
 }
 
-# Stats de "Color The Meme". De momento solo COMPLETED PAINTINGS.
-# Añadir más stats en el futuro NO rompe nada: cada stat se guarda en
-# su propia fila, así que los envíos antiguos solo tendrán esta.
+# Stats de "Color The Meme": WINS, COMPLETED PAINTINGS, KEYS PAINTED y
+# BEST TIME. 'paintings' conserva su clave para no perder los récords
+# ya guardados. BEST TIME aquí es VERDE (en Find The Needle es azul), así
+# que usa su propio campo de Gemini ('meme_best_time').
 STATS_COLOR_THE_MEME = {
+    "wins": STAT_WINS_TARJETA,
     "paintings": {
         "desc": (
             "Número en TEXTO AZUL etiquetado 'COMPLETED PAINTINGS' "
@@ -224,6 +229,40 @@ STATS_COLOR_THE_MEME = {
         "emoji": "🖼️",
         "title": "MOST PAINTINGS",
         "widget_color": (0.0, 0.6, 1.0),  # azul
+    },
+    "keys": {
+        "desc": (
+            "Número en TEXTO ROJO etiquetado 'KEYS PAINTED' DENTRO de la "
+            "tarjeta negra titulada 'LIFETIME STATS' (la del medio, con "
+            "borde arcoíris y el avatar del jugador a la izquierda). "
+            "Puede tener DOS partes separadas por un ESPACIO: dígitos y "
+            "sufijo (ejemplo: '233.4 M', '8.2 K', '125'). NO lleva el "
+            "símbolo '$' delante.\n"
+            "Si DENTRO de la tarjeta hubiera por error más de un valor "
+            "candidato a 'KEYS PAINTED', escoge el MÁS ALTO. "
+            f"Sufijos posibles: {SUFIJOS_DEL_JUEGO}."
+        ),
+        "format": "plain",
+        "emoji": "🔑",
+        "title": "MOST KEYS",
+        "widget_color": (1.0, 0.2509804, 0.3490196),  # rojo
+    },
+    "best_time": {
+        "field": "meme_best_time",
+        "desc": (
+            "Tiempo en TEXTO VERDE etiquetado 'BEST TIME' DENTRO de la "
+            "tarjeta negra titulada 'LIFETIME STATS' (la del medio, con "
+            "borde arcoíris y el avatar del jugador a la izquierda). "
+            "Es un TIEMPO con el formato horas:minutos:segundos, pero "
+            "el juego OMITE las horas y los minutos cuando valen cero: "
+            "'1:02:03' (1 h 2 min 3 s), '12:01' (12 min 1 s), '45' "
+            "(45 s). NO es un número con sufijo."
+        ),
+        "format": "time",
+        "lower_is_better": True,
+        "emoji": "⏱️",
+        "title": "BEST TIME",
+        "widget_color": (0.4705882, 0.9411765, 0.0),  # verde
     },
 }
 
