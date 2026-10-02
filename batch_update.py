@@ -208,22 +208,30 @@ async def _procesar_mensaje(message: discord.Message) -> str | None:
         await _rechazar(message, "gemini_error")
         return None
 
-    if not stats.get("stats_detected"):
-        await _rechazar(message, "not_a_stats_card")
-        return None
+    # Juego forzado a mano (reprocesar 'ID=juego'): se salta la
+    # comprobación de tarjeta/código de isla, pensada para capturas que
+    # se enviaron sin el código visible.
+    forzado = JUEGO_FORZADO.get(str(message.id))
+    if forzado:
+        print(f"[INFO] msg {message.id}: juego forzado a mano -> '{forzado}'.")
+        juego = (forzado, GAMES[forzado])
+    else:
+        if not stats.get("stats_detected"):
+            await _rechazar(message, "not_a_stats_card")
+            return None
 
-    # 2) Identificar el juego por el código de isla.
-    codigo_leido = stats.get("island_code", "")
-    if not _tiene_parentesis(codigo_leido):
-        print(f"[INFO] msg {message.id}: código sin paréntesis ('{codigo_leido}'). Rechazada.")
-        await _rechazar(message, "island_code_unreadable")
-        return None
+        # 2) Identificar el juego por el código de isla.
+        codigo_leido = stats.get("island_code", "")
+        if not _tiene_parentesis(codigo_leido):
+            print(f"[INFO] msg {message.id}: código sin paréntesis ('{codigo_leido}'). Rechazada.")
+            await _rechazar(message, "island_code_unreadable")
+            return None
 
-    juego = get_game_by_island_code(codigo_leido)
-    if juego is None:
-        print(f"[INFO] msg {message.id}: código '{codigo_leido}' no corresponde a ningún juego configurado.")
-        await _rechazar(message, "island_code_unknown")
-        return None
+        juego = get_game_by_island_code(codigo_leido)
+        if juego is None:
+            print(f"[INFO] msg {message.id}: código '{codigo_leido}' no corresponde a ningún juego configurado.")
+            await _rechazar(message, "island_code_unknown")
+            return None
 
     game_key, game_config = juego
 
@@ -321,20 +329,38 @@ async def _procesar_mensaje(message: discord.Message) -> str | None:
     return game_key
 
 
-def _ids_a_reprocesar() -> list[str]:
+# {message_id: game_key} de las capturas reprocesadas con juego forzado.
+JUEGO_FORZADO: dict[str, str] = {}
+
+
+def _ids_a_reprocesar() -> list[tuple[str, str | None]]:
     """
-    IDs de mensajes que un moderador pide reprocesar a mano (input
+    Mensajes que un moderador pide reprocesar a mano (input
     'reprocesar' del workflow -> variable REPROCESAR). Acepta IDs o
     enlaces de Discord separados por comas, espacios o saltos de línea;
     de cada enlace se queda con el último número (el ID del mensaje).
+
+    Opcionalmente se puede forzar el juego con 'ID=clave_juego' (p. ej.
+    '1552744445101871205=color_the_meme') para capturas sin código de
+    isla. Devuelve [(message_id, game_key o None), ...].
     """
     crudo = os.environ.get("REPROCESAR", "")
-    ids = []
+    salida = []
     for trozo in crudo.replace(",", " ").split():
-        ultimo = trozo.rstrip("/").split("/")[-1]
-        if ultimo.isdigit():
-            ids.append(ultimo)
-    return ids
+        ref, _, juego = trozo.partition("=")
+        ultimo = ref.rstrip("/").split("/")[-1]
+        if not ultimo.isdigit():
+            print(f"[WARN] reprocesar: no entiendo '{trozo}'; lo ignoro.")
+            continue
+        juego = juego.strip() or None
+        if juego is not None and juego not in GAMES:
+            print(
+                f"[WARN] reprocesar: juego '{juego}' desconocido para "
+                f"{ultimo}; lo ignoro. Juegos: {sorted(GAMES)}"
+            )
+            continue
+        salida.append((ultimo, juego))
+    return salida
 
 
 # Nº máximo de pasadas (ejecuciones) que reintentamos una captura en cola
@@ -537,8 +563,13 @@ async def on_ready():
         juegos_tocados: set[str] = set()
         # Capturas pedidas a mano (p. ej. rechazadas antes de configurar
         # su juego): se meten en la cola para procesarlas ahora mismo.
-        for mid in _ids_a_reprocesar():
-            print(f"[QUEUE] msg {mid} añadida a mano para reprocesar.")
+        for mid, juego in _ids_a_reprocesar():
+            if juego:
+                JUEGO_FORZADO[mid] = juego
+            print(
+                f"[QUEUE] msg {mid} añadida a mano para reprocesar"
+                + (f" (juego forzado: {juego})." if juego else ".")
+            )
             await añadir_pendiente(mid, intentos=1)
         await _procesar_cola_pendientes(c_submit, juegos_tocados)
 

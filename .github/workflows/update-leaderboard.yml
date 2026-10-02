@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       reprocesar:
-        description: "IDs o enlaces de mensajes de Discord a reprocesar (separados por comas o espacios). Opcional."
+        description: "IDs o enlaces de mensajes de Discord a reprocesar (separados por comas o espacios). Para forzar el juego si falta el código de isla: ID=clave_juego (ej. 123=color_the_meme). Opcional."
         required: false
         default: ""
       silencioso:
