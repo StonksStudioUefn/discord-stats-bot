@@ -130,6 +130,21 @@ def _build_rejection(message: "discord.Message", reason_key: str) -> tuple[str, 
     # allowed_mentions explícito: garantizamos que SÍ se notifica al usuario.
     return contenido, discord.AllowedMentions(users=True, roles=False, everyone=False)
 
+
+# Modo silencioso (input 'silencioso' del workflow -> SILENCIOSO=true):
+# los rechazos/errores NO se publican en Discord, solo se ven en el log.
+# Las confirmaciones de capturas procesadas bien sí se publican.
+SILENCIOSO = os.environ.get("SILENCIOSO", "").strip().lower() in ("1", "true", "yes", "si", "sí")
+
+
+async def _rechazar(message: "discord.Message", reason_key: str) -> None:
+    """Responde al jugador con el motivo del rechazo (salvo en modo silencioso)."""
+    if SILENCIOSO:
+        print(f"[SILENCIO] msg {message.id}: rechazo '{reason_key}' no publicado.")
+        return
+    contenido, am = _build_rejection(message, reason_key)
+    await message.reply(contenido, allowed_mentions=am)
+
 intents = discord.Intents.default()
 intents.message_content = True
 client = discord.Client(intents=intents)
@@ -190,28 +205,24 @@ async def _procesar_mensaje(message: discord.Message) -> str | None:
         raise
     except Exception as error:
         print(f"[WARN] msg {message.id}: error definitivo en Gemini: {error}")
-        contenido, am = _build_rejection(message, "gemini_error")
-        await message.reply(contenido, allowed_mentions=am)
+        await _rechazar(message, "gemini_error")
         return None
 
     if not stats.get("stats_detected"):
-        contenido, am = _build_rejection(message, "not_a_stats_card")
-        await message.reply(contenido, allowed_mentions=am)
+        await _rechazar(message, "not_a_stats_card")
         return None
 
     # 2) Identificar el juego por el código de isla.
     codigo_leido = stats.get("island_code", "")
     if not _tiene_parentesis(codigo_leido):
         print(f"[INFO] msg {message.id}: código sin paréntesis ('{codigo_leido}'). Rechazada.")
-        contenido, am = _build_rejection(message, "island_code_unreadable")
-        await message.reply(contenido, allowed_mentions=am)
+        await _rechazar(message, "island_code_unreadable")
         return None
 
     juego = get_game_by_island_code(codigo_leido)
     if juego is None:
         print(f"[INFO] msg {message.id}: código '{codigo_leido}' no corresponde a ningún juego configurado.")
-        contenido, am = _build_rejection(message, "island_code_unknown")
-        await message.reply(contenido, allowed_mentions=am)
+        await _rechazar(message, "island_code_unknown")
         return None
 
     game_key, game_config = juego
@@ -242,8 +253,7 @@ async def _procesar_mensaje(message: discord.Message) -> str | None:
             f"(leído '{nombre_leido}', "
             f"name_fully_visible={nombre_visible}). Rechazada."
         )
-        contenido, am = _build_rejection(message, "name_unreadable")
-        await message.reply(contenido, allowed_mentions=am)
+        await _rechazar(message, "name_unreadable")
         return None
 
     # 3) Guardar cada stat del juego que tenga valor leído.
@@ -297,8 +307,7 @@ async def _procesar_mensaje(message: discord.Message) -> str | None:
             )
 
     if not lineas_resumen:
-        contenido, am = _build_rejection(message, "stats_unreadable")
-        await message.reply(contenido, allowed_mentions=am)
+        await _rechazar(message, "stats_unreadable")
         return None
 
     cabecera = (
@@ -376,9 +385,8 @@ async def _procesar_cola_pendientes(
                     f"[QUEUE] msg {message_id} agotó {MAX_PASADAS_PENDIENTE} "
                     f"pasadas; aviso al usuario y lo saco de la cola."
                 )
-                contenido, am = _build_rejection(message, "gemini_error")
                 try:
-                    await message.reply(contenido, allowed_mentions=am)
+                    await _rechazar(message, "gemini_error")
                 except discord.HTTPException:
                     pass
                 await quitar_pendiente(message_id)
