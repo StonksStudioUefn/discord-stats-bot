@@ -143,6 +143,51 @@ STATS_SPEED_WINS = {
     },
 }
 
+# Stats para el modo "Find The Needle".
+STATS_NEEDLE = {
+    "wins": {
+        "desc": (
+            "Número en TEXTO AMARILLO etiquetado 'WINS' DENTRO de la "
+            "tarjeta negra titulada 'LIFETIME STATS'. "
+            "Tiene DOS partes separadas por un ESPACIO: dígitos y "
+            "sufijo (ejemplo: '1 K', '500', '2.5 M'). NO lleva el "
+            "símbolo '$' delante.\n"
+            f"Sufijos posibles: {SUFIJOS_DEL_JUEGO}."
+        ),
+        "format": "plain",
+        "emoji": "🏆",
+        "title": "MOST WINS",
+        "widget_color": (1.0, 0.8705882, 0.1254902),  # amarillo
+    },
+    "hay_collected": {
+        "desc": (
+            "Número en TEXTO NARANJA etiquetado como 'Hay Collected' "
+            "DENTRO de la tarjeta negra titulada 'LIFETIME STATS'. "
+            "Tiene DOS partes separadas por un ESPACIO: dígitos y "
+            "sufijo (ejemplo: '117.5 Sx', '1.2 Qa', '800'). "
+            "NO lleva el símbolo '$' delante.\n"
+            f"Sufijos posibles: {SUFIJOS_DEL_JUEGO}."
+        ),
+        "format": "plain",  # Cambiado a 'plain' ya que no tiene el símbolo de dólar ($)
+        "emoji": "🌾",
+        "title": "MOST HAY COLLECTED",
+        "widget_color": (1.0, 0.549, 0.0),  # naranja
+    },
+    "best_time": {
+        "desc": (
+            "Tiempo en TEXTO AZUL etiquetado 'BEST TIME' DENTRO de la "
+            "tarjeta negra titulada 'LIFETIME STATS'. "
+            "Representa el mejor tiempo de minijuego. "
+            "Se muestra en formato de reloj usando dos puntos (ejemplo: '14:20' o '1:14:20'). "
+            "Devuelve el tiempo EXACTAMENTE como aparece en pantalla."
+        ),
+        "format": "time", 
+        "emoji": "⏱️",
+        "title": "BEST TIME",
+        "widget_color": (0.2, 0.6, 1.0),  # azul
+    },
+}
+
 # Descripción común del nombre del jugador.
 NOMBRE_JUGADOR_DESC = (
     "Texto blanco que aparece debajo de la imagen de perfil (avatar) "
@@ -220,17 +265,18 @@ GAMES: dict[str, dict] = {
     },
 
     # ------------------------------------------------------------------
-    # PLANTILLA PARA AÑADIR UN JUEGO NUEVO (copia y modifica)
+    # FIND THE NEEDLE
     # ------------------------------------------------------------------
-    # "mi_juego": {
-    #     "display_name": "Mi Juego",
-    #     "emoji": "🎮",
-    #     "island_code": "0000-0000-0000",
-    #     "color": 0x9966FF,
-    #     "player_name_description": "...",
-    #     "stats": { ... },
-    #     "top_size": 10,
-    # },
+    "find_the_needle": {
+        "display_name": "Find The Needle",
+        "emoji": "🪡",
+        "island_code": "8541-5086-2780",
+        "color": 0xFFA500,  # naranja
+        "uefn_project": "MT_FindTheNeedle", # <-- RECUERDA: Cambiar esto por tu nombre de proyecto real
+        "player_name_description": NOMBRE_JUGADOR_DESC,
+        "stats": STATS_NEEDLE,
+        "top_size": 10,
+    },
 }
 
 
