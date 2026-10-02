@@ -312,6 +312,22 @@ async def _procesar_mensaje(message: discord.Message) -> str | None:
     return game_key
 
 
+def _ids_a_reprocesar() -> list[str]:
+    """
+    IDs de mensajes que un moderador pide reprocesar a mano (input
+    'reprocesar' del workflow -> variable REPROCESAR). Acepta IDs o
+    enlaces de Discord separados por comas, espacios o saltos de línea;
+    de cada enlace se queda con el último número (el ID del mensaje).
+    """
+    crudo = os.environ.get("REPROCESAR", "")
+    ids = []
+    for trozo in crudo.replace(",", " ").split():
+        ultimo = trozo.rstrip("/").split("/")[-1]
+        if ultimo.isdigit():
+            ids.append(ultimo)
+    return ids
+
+
 # Nº máximo de pasadas (ejecuciones) que reintentamos una captura en cola
 # antes de rendirnos y avisar al usuario.
 MAX_PASADAS_PENDIENTE = 5
@@ -511,6 +527,11 @@ async def on_ready():
         #     fallaron por errores transitorios de Gemini en pasadas
         #     anteriores). Se reintentan hasta MAX_PASADAS_PENDIENTE veces.
         juegos_tocados: set[str] = set()
+        # Capturas pedidas a mano (p. ej. rechazadas antes de configurar
+        # su juego): se meten en la cola para procesarlas ahora mismo.
+        for mid in _ids_a_reprocesar():
+            print(f"[QUEUE] msg {mid} añadida a mano para reprocesar.")
+            await añadir_pendiente(mid, intentos=1)
         await _procesar_cola_pendientes(c_submit, juegos_tocados)
 
         # --- Procesar cada captura NUEVA y trackear qué juegos refrescar ---

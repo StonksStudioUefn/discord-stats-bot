@@ -3,6 +3,11 @@ name: Actualizar leaderboard
 on:
   # Botón "Run workflow" en la pestaña Actions del repo.
   workflow_dispatch:
+    inputs:
+      reprocesar:
+        description: "IDs o enlaces de mensajes de Discord a reprocesar (separados por comas o espacios). Opcional."
+        required: false
+        default: ""
 
   # Programado: cada hora en punto (UTC).
   # Cambia el patrón si quieres otra frecuencia:
@@ -52,6 +57,8 @@ jobs:
           # por cron ('schedule'). El bot usa esto para decidir si
           # refresca TODOS los embeds (manual) o solo los que cambiaron.
           GITHUB_EVENT_NAME: ${{ github.event_name }}
+          # Mensajes a reprocesar a mano (solo en ejecución manual).
+          REPROCESAR: ${{ inputs.reprocesar }}
         run: python batch_update.py
 
       - name: Publicar widgets en la web (commit de docs/widgets.json)
