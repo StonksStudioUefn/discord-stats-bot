@@ -33,7 +33,7 @@ _supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 # =====================================================================
 def _guardar_stat_sync(
     game: str, discord_id: str, username: str, stat: str, value: int,
-    is_vip: bool = False,
+    is_vip: bool = False, lower_is_better: bool = False,
 ) -> dict:
     """
     Guarda la mejor marca del jugador en UNA stat de UN juego.
@@ -44,6 +44,9 @@ def _guardar_stat_sync(
     y reutilizamos el que ya tenía guardado. Solo se respeta el
     'username' parámetro cuando es la PRIMERA vez que vemos ese
     discord_id. Para cambiar el nombre, edita la BD a mano.
+
+    Si lower_is_better=True (p. ej. tiempos), el récord es el valor
+    MÁS BAJO en vez del más alto.
 
     Nota técnica: el valor se envía como STRING para que NUMERIC en
     Postgres lo reciba con precisión arbitraria.
@@ -88,7 +91,8 @@ def _guardar_stat_sync(
 
     # Convertimos lo que devuelve Supabase a int de Python (precisión arbitraria).
     record_previo = int(str(actual.get("best_value", 0)).split(".")[0])
-    if value > record_previo:
+    mejora = value < record_previo if lower_is_better else value > record_previo
+    if mejora:
         # Importante: NO incluimos 'username' en este update aunque esté
         # en 'fila', porque la fila trae el nombre congelado y queremos
         # que se respete el que está en la BD si tú lo editaste a mano.
@@ -118,10 +122,11 @@ def _guardar_stat_sync(
 
 async def guardar_stat(
     game: str, discord_id: str, username: str, stat: str, value: int,
-    is_vip: bool = False,
+    is_vip: bool = False, lower_is_better: bool = False,
 ) -> dict:
     return await asyncio.to_thread(
-        _guardar_stat_sync, game, discord_id, username, stat, value, is_vip
+        _guardar_stat_sync, game, discord_id, username, stat, value, is_vip,
+        lower_is_better,
     )
 
 
@@ -150,14 +155,19 @@ async def obtener_record_previo(
     )
 
 
-def _top_sync(game: str, stat: str, limit: int) -> list[dict]:
-    """Top N de una stat concreta de un juego, ordenado descendentemente."""
+def _top_sync(
+    game: str, stat: str, limit: int, ascending: bool = False
+) -> list[dict]:
+    """
+    Top N de una stat concreta de un juego. Por defecto de mayor a
+    menor; con ascending=True de menor a mayor (p. ej. tiempos).
+    """
     consulta = (
         _supabase.table(LEADERBOARD)
         .select("username,best_value,is_vip,updated_at")
         .eq("game", game)
         .eq("stat", stat)
-        .order("best_value", desc=True)
+        .order("best_value", desc=not ascending)
         .limit(limit)
         .execute()
     )
@@ -169,8 +179,10 @@ def _top_sync(game: str, stat: str, limit: int) -> list[dict]:
     return filas
 
 
-async def obtener_top(game: str, stat: str, limit: int = 10) -> list[dict]:
-    return await asyncio.to_thread(_top_sync, game, stat, limit)
+async def obtener_top(
+    game: str, stat: str, limit: int = 10, ascending: bool = False
+) -> list[dict]:
+    return await asyncio.to_thread(_top_sync, game, stat, limit, ascending)
 
 
 # =====================================================================

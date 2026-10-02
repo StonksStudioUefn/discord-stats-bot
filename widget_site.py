@@ -16,7 +16,7 @@ import os
 from datetime import datetime, timezone
 
 from formatting import format_value
-from games import GAMES, TEMPLATE_UEFN_PROJECT, game_enabled
+from games import GAMES, TEMPLATE_UEFN_PROJECT, game_enabled, stat_lower_is_better
 from widget_export import build_widget_t3d
 
 _DIR = os.path.dirname(os.path.abspath(__file__))
@@ -53,7 +53,7 @@ async def generar_widgets_json(plantilla: str | None, obtener_top) -> bool:
     Construye docs/widgets.json con los widgets de todos los juegos.
 
     plantilla:    contenido T3D de la plantilla (o None si falta).
-    obtener_top:  async (game_key, stat_key, limit) -> lista de filas
+    obtener_top:  async (game_key, stat_key, limit, ascending) -> lista de filas
                   con username / best_value / is_vip.
 
     Devuelve True si se escribió el archivo, False si no había plantilla.
@@ -72,7 +72,8 @@ async def generar_widgets_json(plantilla: str | None, obtener_top) -> bool:
         stats = []
         for stat_key, stat_info in game_config["stats"].items():
             top = await obtener_top(
-                game_key, stat_key, limit=game_config["top_size"]
+                game_key, stat_key, limit=game_config["top_size"],
+                ascending=stat_lower_is_better(stat_info),
             )
             fmt = stat_info.get("format", "raw")
             filas = [

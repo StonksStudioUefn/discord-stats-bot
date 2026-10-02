@@ -40,13 +40,15 @@ from database import (
     listar_pendientes,
     quitar_pendiente,
 )
-from formatting import format_value, parse_abbrev
+from formatting import format_value, parse_value
 from games import (
     GAMES,
     LEADERBOARD_CHANNEL,
     SUBMIT_CHANNEL,
     game_enabled,
     get_game_by_island_code,
+    stat_field,
+    stat_lower_is_better,
 )
 from gemini_service import GeminiTransientError, extract_stats_from_image
 from widget_site import generar_widgets_json
@@ -104,7 +106,7 @@ REJECT_REASONS = {
     ),
     "stats_unreadable": (
         "I detected the card but couldn't read any of the statistics. "
-        "Make sure the **income** and **cash** values are clearly visible "
+        "Make sure the **stats** on the card are clearly visible "
         "and not blurry."
     ),
     "gemini_error": (
@@ -250,8 +252,9 @@ async def _procesar_mensaje(message: discord.Message) -> str | None:
     lineas_resumen: list[str] = []
 
     for stat_key, stat_info in game_config["stats"].items():
-        valor_crudo = stats.get(stat_key, "")
-        valor = parse_abbrev(valor_crudo)
+        fmt = stat_info.get("format", "raw")
+        valor_crudo = stats.get(stat_field(stat_key, stat_info), "")
+        valor = parse_value(valor_crudo, fmt)
         if valor <= 0:
             continue
 
@@ -267,12 +270,12 @@ async def _procesar_mensaje(message: discord.Message) -> str | None:
                 stat=stat_key,
                 value=valor,
                 is_vip=es_vip,
+                lower_is_better=stat_lower_is_better(stat_info),
             )
         except Exception as error:
             print(f"[ERROR] {game_key}/{stat_key}: fallo al guardar: {error}")
             continue
 
-        fmt = stat_info.get("format", "raw")
         emoji = stat_info.get("emoji", "📊")
         valor_fmt = format_value(valor, fmt)
         estado = resultado["estado"]
@@ -399,7 +402,10 @@ async def _construir_embed(game_key: str, game_config: dict) -> discord.Embed:
         emoji = stat_info.get("emoji", "📊")
         titulo = stat_info.get("title", stat_key.upper())
 
-        top = await obtener_top(game_key, stat_key, limit=game_config["top_size"])
+        top = await obtener_top(
+            game_key, stat_key, limit=game_config["top_size"],
+            ascending=stat_lower_is_better(stat_info),
+        )
         if not top:
             cuerpo = "_No records yet._"
         else:
