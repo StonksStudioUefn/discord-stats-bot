@@ -54,27 +54,6 @@ from gemini_service import GeminiTransientError, extract_stats_from_image
 from widget_site import generar_widgets_json
 
 
-# Ruta de la plantilla T3D del widget (la misma para todos los juegos;
-# solo cambian título, color y los datos). Colócala en widget_templates/.
-_DIR = os.path.dirname(os.path.abspath(__file__))
-WIDGET_TEMPLATE_PATH = os.path.join(
-    _DIR, "widget_templates", "leaderboard_widget.t3d"
-)
-
-
-def _cargar_plantilla_widget() -> str | None:
-    """Lee la plantilla T3D del disco. Devuelve None si no existe."""
-    try:
-        with open(WIDGET_TEMPLATE_PATH, "r", encoding="utf-8") as f:
-            return f.read()
-    except FileNotFoundError:
-        print(
-            f"[WARN] No encontré la plantilla del widget en "
-            f"{WIDGET_TEMPLATE_PATH}. No generaré los .txt del widget."
-        )
-        return None
-
-
 # Mensajes a mirar en la primera ejecución (cuando no hay puntero previo).
 BACKFILL_PRIMERA_VEZ = 25
 # Tope por ejecución, evita tandas inesperadas.
@@ -641,13 +620,7 @@ async def on_ready():
         # juegos en un archivo). Si nada cambió, no hace falta tocarlo.
         if a_refrescar:
             try:
-                plantilla = _cargar_plantilla_widget()
-                escrito = await generar_widgets_json(plantilla, obtener_top)
-                if not escrito:
-                    print(
-                        "[WEB] No se generó widgets.json (falta la "
-                        "plantilla en widget_templates/)."
-                    )
+                await generar_widgets_json(obtener_top)
             except Exception as e:
                 print(f"[ERROR] Generando widgets.json: {e}")
 

@@ -2,9 +2,10 @@
 widget_site.py
 ==============
 Genera el archivo docs/widgets.json que alimenta la página web de
-GitHub Pages. Contiene, por cada juego y stat, el T3D del widget ya
-rellenado (listo para copiar y pegar en UEFN), más metadatos para
-mostrarlo bien en la web (título, color, emoji, top 10, fecha).
+GitHub Pages. Contiene, por cada juego y stat, el top (nombre, valor
+formateado, VIP) y los metadatos para mostrarlo bien en la web (título,
+color, emoji, fecha), más los datos públicos del mapa (nombre oficial,
+enlace a fortnite.gg e imagen; ver fortnite_gg.py).
 
 El bot llama a generar_widgets_json() al final de cada actualización;
 el workflow de GitHub Actions hace luego commit+push de este archivo,
@@ -16,8 +17,8 @@ import os
 from datetime import datetime, timezone
 
 from formatting import format_value
-from games import GAMES, TEMPLATE_UEFN_PROJECT, game_enabled, stat_lower_is_better
-from widget_export import build_widget_t3d
+from fortnite_gg import info_islas, normalizar_codigo, url_isla
+from games import GAMES, game_enabled, stat_lower_is_better
 
 _DIR = os.path.dirname(os.path.abspath(__file__))
 WIDGETS_JSON_PATH = os.path.join(_DIR, "docs", "widgets.json")
@@ -48,27 +49,65 @@ def _color_juego(game_config: dict) -> str | None:
     return None
 
 
-async def generar_widgets_json(plantilla: str | None, obtener_top) -> bool:
-    """
-    Construye docs/widgets.json con los widgets de todos los juegos.
+def _islas_anteriores() -> dict[str, dict]:
+    """La 'island' de cada juego en el widgets.json actual (si lo hay)."""
+    try:
+        with open(WIDGETS_JSON_PATH, encoding="utf-8") as f:
+            doc = json.load(f)
+        return {
+            g["key"]: g["island"]
+            for g in doc.get("games", [])
+            if isinstance(g.get("island"), dict)
+        }
+    except (OSError, ValueError, KeyError, TypeError):
+        return {}
 
-    plantilla:    contenido T3D de la plantilla (o None si falta).
+
+async def _islas(juegos: dict[str, dict]) -> dict[str, dict]:
+    """
+    Nombre, enlace e imagen del mapa de cada juego (fortnite_gg.py). Lo que
+    no se pueda sacar ahora se conserva de la última vez, para que un fallo
+    puntual de fortnite.gg no deje la web sin imágenes.
+    """
+    codigos = {
+        k: normalizar_codigo(cfg.get("island_code", ""))
+        for k, cfg in juegos.items()
+    }
+    codigos = {k: c for k, c in codigos.items() if c}
+    try:
+        nuevas = await info_islas(codigos)
+    except Exception as e:  # la web no debe caerse por fortnite.gg
+        print(f"[WEB] No pude consultar las islas: {e}")
+        nuevas = {}
+    anteriores = _islas_anteriores()
+
+    islas = {}
+    for k, codigo in codigos.items():
+        isla = {"code": codigo, "url": url_isla(codigo)}
+        previa = anteriores.get(k, {})
+        if previa.get("code") != codigo:
+            previa = {}  # cambió el código: lo de antes es de otra isla
+        nueva = nuevas.get(k, {})
+        for campo in ("name", "creator", "released", "icon", "thumb"):
+            isla[campo] = nueva.get(campo) or previa.get(campo)
+        islas[k] = isla
+    return islas
+
+
+async def generar_widgets_json(obtener_top) -> None:
+    """
+    Construye docs/widgets.json con los leaderboards de todos los juegos.
+
     obtener_top:  async (game_key, stat_key, limit, ascending) -> lista de filas
                   con username / best_value / is_vip.
-
-    Devuelve True si se escribió el archivo, False si no había plantilla.
     """
-    if plantilla is None:
-        print("[WEB] No hay plantilla del widget; no genero widgets.json.")
-        return False
-
     ahora = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     juegos = []
+    activos = {k: cfg for k, cfg in GAMES.items() if game_enabled(cfg)}
+    islas = await _islas(activos)
 
-    for game_key, game_config in GAMES.items():
-        # Saltar juegos desactivados (enabled: False): no aparecen en la web.
-        if not game_enabled(game_config):
-            continue
+    # Los juegos desactivados (enabled: False) no aparecen en la web.
+    for game_key, game_config in activos.items():
         stats = []
         for stat_key, stat_info in game_config["stats"].items():
             top = await obtener_top(
@@ -84,27 +123,13 @@ async def generar_widgets_json(plantilla: str | None, obtener_top) -> bool:
                 }
                 for fila in top
             ]
-            titulo = stat_info.get("title", stat_key.upper())
-            color = stat_info.get("widget_color")
-
-            t3d = build_widget_t3d(
-                template_t3d=plantilla,
-                rows=filas,
-                title=titulo,
-                color_rgb=color,
-                rows_count=game_config["top_size"],
-                template_project=TEMPLATE_UEFN_PROJECT,
-                target_project=game_config.get("uefn_project"),
-            )
-
             stats.append(
                 {
                     "key": stat_key,
-                    "title": titulo,
+                    "title": stat_info.get("title", stat_key.upper()),
                     "emoji": stat_info.get("emoji", ""),
-                    "color": _color_hex(color),
-                    "rows": filas,        # para la vista previa
-                    "t3d": t3d,           # lo que se copia a UEFN
+                    "color": _color_hex(stat_info.get("widget_color")),
+                    "rows": filas,
                     "updated": ahora,
                 }
             )
@@ -115,6 +140,7 @@ async def generar_widgets_json(plantilla: str | None, obtener_top) -> bool:
                 "name": game_config["display_name"],
                 "emoji": game_config.get("emoji", "🎮"),
                 "color": _color_juego(game_config),
+                "island": islas.get(game_key),
                 "stats": stats,
             }
         )
@@ -126,4 +152,3 @@ async def generar_widgets_json(plantilla: str | None, obtener_top) -> bool:
         json.dump(documento, f, ensure_ascii=False, indent=2)
 
     print(f"[WEB] Escrito {WIDGETS_JSON_PATH} ({len(juegos)} juegos).")
-    return True
