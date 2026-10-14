@@ -132,9 +132,12 @@
 
   /* Jugadores en el mapa: Epic (cada 10 min, nulo por debajo de 5) y, si
      Epic no lo tiene, fortnite.gg. */
-  .live { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 0.82rem; color: var(--muted); min-height: 1.5em; }
-  .live strong { color: var(--text); font-variant-numeric: tabular-nums; }
-  .live .faint { color: var(--faint); font-size: 0.76rem; }
+  .live {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 10px; border-radius: 999px; background: var(--bg-2); border: 1px solid var(--line-soft);
+    font-size: 0.76rem; color: var(--muted); font-variant-numeric: tabular-nums;
+  }
+  .live strong { color: var(--text); font-weight: 600; }
   .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); flex: none; position: relative; }
   .pulse.on { background: var(--t-green); }
   .pulse.on::after {
@@ -383,9 +386,9 @@ function renderHero() {
       '<h2>' + escapeHtml(isl.name || g.name) + '</h2>' +
       '<div class="meta">' +
         (code ? '<button type="button" class="code-chip" id="codeChip" title="Copiar el código de isla">' + ICON.copy + escapeHtml(code) + '</button>' : '') +
+        (code ? '<span class="live" id="heroLive" hidden></span>' : '') +
         (isl.creator ? '<span>de <strong>' + escapeHtml(isl.creator) + '</strong></span>' : '') +
       '</div>' +
-      '<div class="live" id="heroLive"></div>' +
       (code ? '<div class="actions"><a class="btn btn-secondary btn-sm" href="' + islandUrl(code) + '" target="_blank" rel="noopener">' +
         ICON.ext + 'Ver en fortnite.gg</a></div>' : '') +
     '</div>';
@@ -565,16 +568,15 @@ function renderLive() {
   if (!hero) return;
   const g = state.data.games[state.game];
   const p = state.live[g.key];
-  if (!islandCode(g) || (p && p.none)) { hero.hidden = true; return; }
-  hero.hidden = false;
-  if (!p) { hero.innerHTML = '<span class="pulse"></span><span class="faint">Mirando cuántos juegan…</span>'; return; }
+  hero.hidden = !p || !!p.none;
+  if (hero.hidden) return;
   const on = !p.under5 && p.now > 0;
-  hero.innerHTML =
-    '<span class="pulse' + (on ? ' on' : '') + '"></span>' +
-    (p.under5 ? '<span>Menos de <strong>5</strong> jugando</span>' : '<span><strong>' + fmtN(p.now) + '</strong> jugando ahora</span>') +
-    (p.peak24 != null ? '<span>· pico 24 h <strong>' + fmtN(p.peak24) + '</strong></span>' : '') +
-    '<span class="faint" title="' + escapeHtml(p.at ? localDate(p.at) : '') + '">· ' + escapeHtml(p.src) +
-      (p.at && p.src === 'Epic' ? ', ' + escapeHtml(relTime(p.at)) : '') + '</span>';
+  hero.innerHTML = '<span class="pulse' + (on ? ' on' : '') + '"></span>' +
+    (p.under5 ? '<span>&lt; <strong>5</strong> jugando</span>' : '<span><strong>' + fmtN(p.now) + '</strong> jugando</span>');
+  hero.title = [
+    p.src + (p.at && p.src === 'Epic' ? ', ' + relTime(p.at) : ''),
+    p.peak24 != null ? 'pico 24 h: ' + fmtN(p.peak24) : '',
+  ].filter(Boolean).join(' · ');
 }
 
 window.addEventListener('hashchange', () => { if (state.data) { readHash(); render(); } });
