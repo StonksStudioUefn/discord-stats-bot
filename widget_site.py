@@ -88,7 +88,7 @@ async def _islas(juegos: dict[str, dict]) -> dict[str, dict]:
         if previa.get("code") != codigo:
             previa = {}  # cambió el código: lo de antes es de otra isla
         nueva = nuevas.get(k, {})
-        for campo in ("name", "creator", "icon", "thumb"):
+        for campo in ("name", "creator", "released", "icon", "thumb"):
             isla[campo] = nueva.get(campo) or previa.get(campo)
         islas[k] = isla
     return islas

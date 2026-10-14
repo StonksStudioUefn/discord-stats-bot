@@ -8,7 +8,7 @@ De dónde sale cada cosa (como en la app de FINANZAS, js/services/fortniteGg.js)
   - Nombre y creador: la API pública de Epic
       https://api.fortnite.com/ecosystem/v1/islands/<código>
     Si falla, el nombre se recorta del <title> de la ficha de fortnite.gg.
-  - Imagen: la ficha de fortnite.gg, leída a través de r.jina.ai
+  - Imagen y fecha de lanzamiento: la ficha de fortnite.gg, leída a través de r.jina.ai
     (fortnite.gg bloquea las peticiones automáticas). Epic no da imágenes
     en su API pública.
 
@@ -28,6 +28,7 @@ Nada de esto lanza: si algo falla se devuelve lo que se haya podido sacar.
 
 import asyncio
 import re
+from datetime import datetime
 
 import aiohttp
 
@@ -83,6 +84,17 @@ def _creador_de_titulo(titulo, codigo: str) -> str:
     return limpiar_nombre(m[1]) if m else ""
 
 
+def _fecha_de_contenido(contenido: str) -> str | None:
+    """«Released:May 17, 2026» de la ficha -> '2026-05-17'."""
+    m = re.search(r"Released:\s*([A-Z][a-z]{2} \d{1,2}, \d{4})", contenido or "")
+    if not m:
+        return None
+    try:
+        return datetime.strptime(m[1], "%b %d, %Y").strftime("%Y-%m-%d")
+    except ValueError:
+        return None
+
+
 def _elegir_imagenes(contenido: str) -> dict:
     """De las imágenes de Epic que trae la ficha: el icono (si lo hay) y la miniatura."""
     urls = list(dict.fromkeys(_IMG_EPIC.findall(contenido or "")))
@@ -111,7 +123,7 @@ async def _json(sesion: aiohttp.ClientSession, url: str, **kw):
 
 async def info_isla(sesion: aiohttp.ClientSession, codigo_crudo: str) -> dict | None:
     """
-    {code, url, name, creator, icon, thumb} de la isla. Los campos que no
+    {code, url, name, creator, released, icon, thumb} de la isla. Los campos que no
     se hayan podido sacar van a None. None si el código no es válido.
     """
     codigo = normalizar_codigo(codigo_crudo)
@@ -143,6 +155,7 @@ async def info_isla(sesion: aiohttp.ClientSession, codigo_crudo: str) -> dict | 
         "url": url_isla(codigo),
         "name": nombre or None,
         "creator": creador or None,
+        "released": _fecha_de_contenido(datos_gg.get("content", "")),
         **_elegir_imagenes(datos_gg.get("content", "")),
     }
 

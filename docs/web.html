@@ -86,6 +86,9 @@
   /* Lista de mapas */
   .maps { padding: 10px; position: sticky; top: 16px; }
   .maps > .eyebrow { padding: 6px 8px 8px; }
+  .maps > .seg { display: flex; width: 100%; margin-bottom: 8px; }
+  .maps > .seg button { flex: 1; justify-content: center; padding: 6px 10px; font-size: 0.76rem; }
+  .maps > .seg .n { color: var(--faint); font-weight: 500; }
   .map-list { display: flex; flex-direction: column; gap: 2px; }
   .map-item {
     display: flex; align-items: center; gap: 11px; width: 100%;
@@ -213,7 +216,8 @@
 
   <div class="layout" id="layout" hidden>
     <nav class="card maps" aria-label="Mapas">
-      <div class="eyebrow">Mapas</div>
+      <div class="eyebrow" id="mapsTitle">Mapas</div>
+      <div class="seg sin-barra" id="creators" role="tablist" aria-label="Creadores" hidden></div>
       <div class="map-list sin-barra" id="mapList" role="tablist" aria-orientation="vertical"></div>
     </nav>
     <main class="main">
@@ -294,7 +298,11 @@ function thumbHtml(g, cls = '') {
 function readHash() {
   const [gk, sk] = decodeURIComponent(location.hash.slice(1)).split('/');
   const gi = state.data.games.findIndex(g => g.key === gk);
-  if (gi < 0) return;
+  if (gi < 0) {
+    state.game = creatorGroups()[0].games[0];
+    state.stat = 0;
+    return;
+  }
   state.game = gi;
   const si = state.data.games[gi].stats.findIndex(s => s.key === sk);
   state.stat = si < 0 ? 0 : si;
@@ -346,15 +354,60 @@ function select(game, stat) {
 }
 
 function render() {
+  renderCreators();
   renderMaps();
   renderHero();
   renderStats();
   renderBoard();
 }
 
+/* Los mapas van por creador (cada uno en su pestaña) y, dentro, del más
+   nuevo al más viejo según la fecha de lanzamiento de fortnite.gg. */
+const CREATOR_ORDER = ['dani280n2', 'sonoq', 'aidenomalley'];
+const creatorOf = g => (g.island && g.island.creator) || '';
+
+function creatorGroups() {
+  const byCreator = new Map();
+  state.data.games.forEach((g, i) => {
+    const c = creatorOf(g);
+    if (!byCreator.has(c)) byCreator.set(c, []);
+    byCreator.get(c).push(i);
+  });
+  const rank = c => {
+    if (!c) return Infinity;
+    const i = CREATOR_ORDER.indexOf(c.toLowerCase());
+    return i < 0 ? CREATOR_ORDER.length : i;
+  };
+  const released = i => (state.data.games[i].island || {}).released || '';
+  return [...byCreator.entries()]
+    .sort(([a], [b]) => rank(a) - rank(b) || a.localeCompare(b))
+    .map(([creator, games]) => ({
+      creator,
+      games: games.sort((a, b) => released(b).localeCompare(released(a)) || a - b),
+    }));
+}
+
+function renderCreators() {
+  const groups = creatorGroups();
+  const cont = $('creators');
+  const show = groups.length > 1;
+  cont.hidden = !show;
+  $('mapsTitle').hidden = show;
+  if (!show) return;
+  const current = creatorOf(state.data.games[state.game]);
+  cont.innerHTML = groups.map((gr, i) =>
+    '<button type="button" role="tab" data-i="' + i + '" aria-selected="' + (gr.creator === current) + '">' +
+      escapeHtml(gr.creator || 'Otros') + ' <span class="n">' + gr.games.length + '</span></button>'
+  ).join('');
+  cont.querySelectorAll('button').forEach(b => b.onclick = () => select(groups[+b.dataset.i].games[0], 0));
+}
+
 function renderMaps() {
   const cont = $('mapList');
-  cont.innerHTML = state.data.games.map((g, i) => {
+  const current = creatorOf(state.data.games[state.game]);
+  const group = creatorGroups().find(gr => gr.creator === current);
+  cont.innerHTML = group.games.map(i => {
+    const g = state.data.games[i];
     const n = (g.stats || []).length;
     const color = safeColor(g.color);
     return '<button class="map-item" role="tab" data-i="' + i + '" aria-selected="' + (i === state.game) + '"' +
