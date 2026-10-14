@@ -2,11 +2,10 @@
 widget_site.py
 ==============
 Genera el archivo docs/widgets.json que alimenta la página web de
-GitHub Pages. Contiene, por cada juego y stat, el T3D del widget ya
-rellenado (listo para copiar y pegar en UEFN), más metadatos para
-mostrarlo bien en la web (título, color, emoji, top 10, fecha) y los
-datos públicos del mapa (nombre oficial, enlace a fortnite.gg e imagen;
-ver fortnite_gg.py).
+GitHub Pages. Contiene, por cada juego y stat, el top (nombre, valor
+formateado, VIP) y los metadatos para mostrarlo bien en la web (título,
+color, emoji, fecha), más los datos públicos del mapa (nombre oficial,
+enlace a fortnite.gg e imagen; ver fortnite_gg.py).
 
 El bot llama a generar_widgets_json() al final de cada actualización;
 el workflow de GitHub Actions hace luego commit+push de este archivo,
@@ -19,8 +18,7 @@ from datetime import datetime, timezone
 
 from formatting import format_value
 from fortnite_gg import info_islas, normalizar_codigo, url_isla
-from games import GAMES, TEMPLATE_UEFN_PROJECT, game_enabled, stat_lower_is_better
-from widget_export import build_widget_t3d
+from games import GAMES, game_enabled, stat_lower_is_better
 
 _DIR = os.path.dirname(os.path.abspath(__file__))
 WIDGETS_JSON_PATH = os.path.join(_DIR, "docs", "widgets.json")
@@ -96,20 +94,13 @@ async def _islas(juegos: dict[str, dict]) -> dict[str, dict]:
     return islas
 
 
-async def generar_widgets_json(plantilla: str | None, obtener_top) -> bool:
+async def generar_widgets_json(obtener_top) -> None:
     """
-    Construye docs/widgets.json con los widgets de todos los juegos.
+    Construye docs/widgets.json con los leaderboards de todos los juegos.
 
-    plantilla:    contenido T3D de la plantilla (o None si falta).
     obtener_top:  async (game_key, stat_key, limit, ascending) -> lista de filas
                   con username / best_value / is_vip.
-
-    Devuelve True si se escribió el archivo, False si no había plantilla.
     """
-    if plantilla is None:
-        print("[WEB] No hay plantilla del widget; no genero widgets.json.")
-        return False
-
     ahora = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     juegos = []
     activos = {k: cfg for k, cfg in GAMES.items() if game_enabled(cfg)}
@@ -132,27 +123,13 @@ async def generar_widgets_json(plantilla: str | None, obtener_top) -> bool:
                 }
                 for fila in top
             ]
-            titulo = stat_info.get("title", stat_key.upper())
-            color = stat_info.get("widget_color")
-
-            t3d = build_widget_t3d(
-                template_t3d=plantilla,
-                rows=filas,
-                title=titulo,
-                color_rgb=color,
-                rows_count=game_config["top_size"],
-                template_project=TEMPLATE_UEFN_PROJECT,
-                target_project=game_config.get("uefn_project"),
-            )
-
             stats.append(
                 {
                     "key": stat_key,
-                    "title": titulo,
+                    "title": stat_info.get("title", stat_key.upper()),
                     "emoji": stat_info.get("emoji", ""),
-                    "color": _color_hex(color),
-                    "rows": filas,        # para la vista previa
-                    "t3d": t3d,           # lo que se copia a UEFN
+                    "color": _color_hex(stat_info.get("widget_color")),
+                    "rows": filas,
                     "updated": ahora,
                 }
             )
@@ -175,4 +152,3 @@ async def generar_widgets_json(plantilla: str | None, obtener_top) -> bool:
         json.dump(documento, f, ensure_ascii=False, indent=2)
 
     print(f"[WEB] Escrito {WIDGETS_JSON_PATH} ({len(juegos)} juegos).")
-    return True

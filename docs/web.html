@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Widgets de leaderboard de los mapas de STONKS, listos para pegar en UEFN">
+<meta name="description" content="Los leaderboards de los mapas de STONKS">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0C0C0D">
 <title>Leaderboards STONKS</title>
@@ -42,17 +42,11 @@
   .top .right { margin-left: auto; }
   .eyebrow { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--faint); }
   .lede { color: var(--muted); font-size: 0.92rem; margin: 10px 0 24px; max-width: 62ch; }
-  kbd {
-    font-family: var(--mono); font-size: 0.78rem; color: var(--text);
-    background: var(--surface-2); border: 1px solid var(--line); border-bottom-width: 2px;
-    border-radius: 6px; padding: 0 5px;
-  }
 
   /* ── Componentes del paquete (como en FINANZAS, css/journey.css) ── */
   .card { background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--r-l); }
   .card-head { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--line-soft); flex-wrap: wrap; }
   .card-head h3 { font-size: 0.96rem; font-weight: 600; letter-spacing: -0.01em; }
-  .card-head .right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -62,12 +56,9 @@
   }
   .btn svg { width: 16px; height: 16px; flex: none; }
   .btn:active { transform: scale(.96); }
-  .btn-primary { background: var(--accent); color: var(--accent-ink); }
   .btn-secondary { background: var(--surface-2); color: var(--text); border-color: var(--line); }
   .btn-sm { padding: 7px 12px; font-size: 0.8rem; }
-  .btn.done { background: var(--s-green); color: var(--k-green); }
   @media (hover: hover) {
-    .btn-primary:hover { filter: brightness(1.07); }
     .btn-secondary:hover { background: var(--surface-3); }
   }
 
@@ -161,22 +152,6 @@
   tr.vacia td { color: var(--faint); }
   .empty { padding: 36px 18px; text-align: center; color: var(--faint); font-size: 0.88rem; }
 
-  /* T3D */
-  details.code-card > summary {
-    list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px;
-    padding: 13px 18px; font-size: 0.86rem; font-weight: 600; color: var(--muted);
-  }
-  details.code-card > summary::-webkit-details-marker { display: none; }
-  details.code-card > summary svg { width: 16px; height: 16px; transition: transform .25s var(--spring); }
-  details.code-card[open] > summary svg.chev { transform: rotate(90deg); }
-  details.code-card > summary .right { margin-left: auto; font-weight: 500; color: var(--faint); font-size: 0.76rem; }
-  @media (hover: hover) { details.code-card > summary:hover { color: var(--text); } }
-  pre {
-    margin: 0; padding: 14px 18px 18px; max-height: 320px; overflow: auto;
-    border-top: 1px solid var(--line-soft);
-    font-family: var(--mono); font-size: 11px; line-height: 1.55; color: var(--faint); white-space: pre;
-  }
-
   .status { padding: 56px 18px; display: flex; flex-direction: column; align-items: center; gap: 14px; color: var(--muted); font-size: 0.9rem; text-align: center; }
   footer { margin-top: 28px; color: var(--faint); font-size: 0.78rem; }
   footer a { color: var(--muted); }
@@ -197,8 +172,6 @@
   @media (max-width: 520px) {
     tbody td, thead th { padding-left: 12px; padding-right: 12px; }
     td.rank { width: 44px; }
-    .card-head .right { margin-left: 0; width: 100%; }
-    .card-head .right .btn { width: 100%; }
   }
   @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; }
@@ -211,11 +184,11 @@
     <span class="logo" id="logo"></span>
     <div>
       <div class="eyebrow">STONKS · Leaderboards</div>
-      <h1>Widgets de leaderboard</h1>
+      <h1>Leaderboards</h1>
     </div>
     <span class="right badge badge-muted" id="updated" hidden></span>
   </header>
-  <p class="lede">Elige un mapa y una estadística, pulsa <strong>Copiar widget</strong> y pégalo con <kbd>Ctrl</kbd>+<kbd>V</kbd> en el Designer de UEFN. Sin descargas.</p>
+  <p class="lede">El top de cada mapa y estadística, tal y como está ahora.</p>
 
   <div class="layout" id="layout" hidden>
     <nav class="card maps" aria-label="Mapas">
@@ -226,11 +199,10 @@
       <section class="card hero" id="hero" aria-live="polite"></section>
       <div class="seg sin-barra" id="stats" role="tablist" aria-label="Estadísticas"></div>
       <section class="card" id="board"></section>
-      <details class="card code-card" id="code"></details>
     </main>
   </div>
 
-  <div class="card status" id="status"><span id="statusChispa"></span><span id="statusText">Cargando widgets…</span></div>
+  <div class="card status" id="status"><span id="statusChispa"></span><span id="statusText">Cargando leaderboards…</span></div>
 
   <footer>Nombres e imágenes de los mapas: <a href="https://fortnite.gg/" target="_blank" rel="noopener">fortnite.gg</a> y Epic Games.</footer>
 </div>
@@ -243,8 +215,6 @@ const ICON = {
   copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>',
   ext: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>',
-  chev: '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>',
-  code: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg>',
 };
 
 /* La chispa: logo quieto, icono de la pestaña y la de carga. */
@@ -322,7 +292,7 @@ async function load() {
     return showStatus('No pude cargar widgets.json (' + e.message + ').');
   }
   if (!state.data.games || !state.data.games.length) {
-    return showStatus('Aún no hay widgets generados. Vuelve cuando el bot haya corrido.');
+    return showStatus('Aún no hay leaderboards. Vuelve cuando el bot haya corrido.');
   }
   readHash();
   $('status').hidden = true;
@@ -357,7 +327,6 @@ function render() {
   renderHero();
   renderStats();
   renderBoard();
-  renderCode();
 }
 
 function renderMaps() {
@@ -428,7 +397,7 @@ function renderBoard() {
 
   let body;
   if (!filled) {
-    body = '<div class="empty">Aún no hay récords en esta estadística.<br>El widget se copiará con las filas vacías.</div>';
+    body = '<div class="empty">Aún no hay récords en esta estadística.</div>';
   } else {
     body = '<table><thead><tr><th>#</th><th>Jugador</th><th class="num">' + escapeHtml(s.title) + '</th></tr></thead><tbody>' +
       rows.map((r, i) => {
@@ -447,24 +416,7 @@ function renderBoard() {
       '<div><h3>' + escapeHtml(s.title) + '</h3>' +
       '<div class="head-sub"' + (d ? ' title="' + escapeHtml(localDate(d)) + '"' : '') + '>' +
         (filled ? 'Top ' + filled : 'Sin récords') + ' · actualizado ' + escapeHtml(relTime(d)) + '</div></div>' +
-      '<div class="right"><button type="button" class="btn btn-primary" id="copyBtn">' + ICON.copy + 'Copiar widget</button></div>' +
     '</div>' + body;
-
-  const btn = $('copyBtn');
-  btn.onclick = () => copyText(s.t3d || '', () => flash(btn, ICON.check + '¡Copiado! Pégalo en UEFN', ICON.copy + 'Copiar widget'));
-}
-
-function renderCode() {
-  const g = state.data.games[state.game];
-  const s = (g.stats || [])[state.stat];
-  const det = $('code');
-  det.hidden = !s;
-  if (!s) return;
-  const open = det.open;
-  const lines = (s.t3d || '').split('\n').length;
-  det.innerHTML = '<summary>' + ICON.chev + ICON.code + 'Ver el T3D<span class="right">' + lines + ' líneas</span></summary><pre></pre>';
-  det.querySelector('pre').textContent = s.t3d || '';
-  det.open = open;
 }
 
 function flash(el, html, back) {
