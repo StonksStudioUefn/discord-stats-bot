@@ -1,249 +1,254 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Los leaderboards de los mapas de STONKS">
 <meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#0C0C0D">
-<title>Leaderboards STONKS</title>
-<!-- El paquete de diseño de STONKS (diseno/README.md en finanzas): los mismos
-     tokens, fuente y chispa que KANBAN, ALMACÉN y FINANZAS. Sin data-app en
-     <html> el acento es el naranja de STONKS. -->
+<meta name="theme-color" content="#161618">
+<title>LEADERBOARDS STONKS</title>
+<!-- El paquete de diseño de STONKS (el mismo que KANBAN, ALMACÉN y FINANZAS)
+     y el armazón del kanban: barra lateral con carpetas y panel redondeado. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,wght@0,400..700;1,400..700&display=swap">
 <link rel="stylesheet" href="diseno/tokens.css">
 <script src="diseno/chispa.js"></script>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { background: var(--frame); }
-  body {
-    min-height: 100vh;
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    font-size: 15px;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-  }
-  button { font: inherit; color: inherit; }
-  a { color: inherit; }
-  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
-  img { display: block; }
-  [hidden] { display: none !important; }
+:root{
+  --fr:14px; --side-w:264px; --maxw:1120px;
+  --gl:max(16px,env(safe-area-inset-left,0px)); --gr:max(16px,env(safe-area-inset-right,0px));
+}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0; min-height:100dvh; background:var(--bg); color:var(--text);
+  font-family:var(--sans); font-size:15px; line-height:1.45;
+  -webkit-font-smoothing:antialiased; overscroll-behavior-y:none; -webkit-tap-highlight-color:transparent;
+}
+button{font:inherit; color:inherit; background:none; border:0; cursor:pointer; padding:0}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:6px}
+::selection{background:var(--accent-soft)}
+[hidden]{display:none!important}
+img{display:block}
 
-  .shell { max-width: 1120px; margin: 0 auto; padding: 28px 16px 64px; }
+/* ── Cabecera ── */
+.app{min-height:100dvh; display:flex; flex-direction:column}
+.hdr{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:40;
+  background:color-mix(in srgb,var(--bg) 90%,transparent);
+  -webkit-backdrop-filter:saturate(1.3) blur(14px); backdrop-filter:saturate(1.3) blur(14px);
+  border-bottom:1px solid var(--line-soft);
+}
+.hdr-in{max-width:var(--maxw); margin-inline:auto; padding-inline:var(--gl) var(--gr)}
+.hdr-row{display:flex; align-items:center; gap:12px; min-height:60px; padding-block:8px}
+.hdr-t{flex:1; min-width:0}
+.hdr-row h1{
+  margin:0; font-family:var(--display); font-weight:700; letter-spacing:-.025em;
+  font-size:24px; line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.icon-btn{
+  position:relative; width:44px; height:44px; flex:none; border-radius:12px; display:grid; place-items:center;
+  color:var(--muted); text-decoration:none;
+  transition:background .16s var(--ease), color .16s var(--ease), transform .2s var(--spring);
+}
+@media (hover:hover){.icon-btn:hover{background:var(--surface-2); color:var(--text)}}
+.icon-btn:active{transform:scale(.9)}
+.icon-btn svg{width:21px; height:21px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round}
+.hdr-menu{display:none; margin-left:-10px}
+.logo{width:28px; height:28px; flex:none; display:block}
 
-  /* ── Cabecera ── */
-  .top { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-  .logo { width: 36px; height: 36px; flex: none; display: grid; place-items: center; }
-  .top h1 { font-size: clamp(1.35rem, 3.2vw, 1.75rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
-  .top .right { margin-left: auto; }
-  .eyebrow { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--faint); }
-  .lede { color: var(--muted); font-size: 0.92rem; margin: 10px 0 24px; max-width: 62ch; }
+.page{width:100%; max-width:var(--maxw); margin-inline:auto; padding:18px var(--gr) calc(32px + env(safe-area-inset-bottom,0px)) var(--gl)}
 
-  /* ── Componentes del paquete (como en FINANZAS, css/journey.css) ── */
-  .card { background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--r-l); }
-  .card-head { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--line-soft); flex-wrap: wrap; }
-  .card-head h3 { font-size: 0.96rem; font-weight: 600; letter-spacing: -0.01em; }
+/* ── Barra lateral con carpetas (una por creador) ── */
+.side{position:fixed; z-index:60; left:0; top:0; bottom:0; width:var(--side-w); display:flex; flex-direction:column;
+  padding:16px 12px calc(12px + env(safe-area-inset-bottom,0px)) 14px; background:var(--frame); overflow:hidden}
+.side-mid{flex:1; min-height:0; display:flex; flex-direction:column; gap:2px; margin-inline:-6px; padding:10px 6px;
+  overflow-y:auto; overscroll-behavior:contain; scrollbar-width:none}
+.side-mid::-webkit-scrollbar{display:none}
+body.shell .app{margin-left:var(--side-w)}
+.side-brand{flex:none; display:flex; align-items:center; gap:12px; padding:4px 6px 14px; font-family:var(--display); font-weight:700; font-size:15px; letter-spacing:.02em;
+  border-bottom:1px solid transparent; transition:border-color .2s var(--ease)}
+.side-brand.lift{border-bottom-color:var(--line-soft)}
+.side-brand .logo{width:38px; height:38px}
+.side-brand > span{white-space:nowrap; font-size:14px; letter-spacing:.01em}
+.side-logo{display:block; flex:none; border-radius:10px; transition:transform .3s var(--spring)}
+.side-logo:active{transform:scale(.9)}
+.side-it{position:relative; display:flex; align-items:center; gap:10px; min-height:42px; padding:6px 10px; border-radius:12px; color:var(--muted); text-decoration:none;
+  transition:background .14s var(--ease), color .14s var(--ease)}
+@media (hover:hover){.side-it:hover{background:rgba(255,255,255,.04); color:var(--text)}}
+.side-it.on{background:var(--surface); color:var(--text)}
+.side-l{flex:1; min-width:0; font-size:14px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.side-sec{margin:6px 10px 4px; font-size:11px; font-weight:650; letter-spacing:.09em; text-transform:uppercase; color:var(--faint)}
+.side-fold{display:flex; align-items:center; gap:6px; width:100%; min-height:34px; padding:4px 10px 4px 6px; border-radius:9px; color:var(--faint); text-align:left;
+  transition:color .14s var(--ease), background .14s var(--ease)}
+@media (hover:hover){.side-fold:hover{color:var(--text); background:var(--surface)}}
+.side-chev{width:18px; height:18px; display:grid; place-items:center}
+.side-chev svg{width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; transition:transform .25s var(--spring)}
+.side-fold[aria-expanded="true"] .side-chev svg{transform:rotate(90deg)}
+.side-fl{flex:1; font-size:11.5px; font-weight:650; letter-spacing:.08em; text-transform:uppercase}
+.side-n{font-size:11.5px; font-variant-numeric:tabular-nums}
+.side-grp{display:flex; flex-direction:column; gap:1px; margin:0 0 6px 12px; padding-left:8px; border-left:1px solid var(--line-soft)}
+.side-grp .side-it{min-height:40px}
+.side-pn{font-size:14.5px}
+.side-cnt{flex:none; display:inline-flex; align-items:center; gap:5px; font-size:11.5px; color:var(--faint); font-variant-numeric:tabular-nums}
+.side-it.on .side-cnt{color:var(--muted)}
+.side-foot{flex:none; padding:12px 8px 0; display:flex; align-items:center; gap:8px; border-top:1px solid var(--line-soft); font-size:12.5px; color:var(--faint)}
+.side-scrim{display:none}
 
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    padding: 10px 16px; border-radius: 12px; font-size: 0.88rem; font-weight: 600;
-    cursor: pointer; border: 1px solid transparent; line-height: 1; white-space: nowrap; text-decoration: none;
-    transition: background-color .16s var(--ease), border-color .16s var(--ease), color .16s var(--ease), filter .16s var(--ease), transform .3s var(--spring);
-  }
-  .btn svg { width: 16px; height: 16px; flex: none; }
-  .btn:active { transform: scale(.96); }
-  .btn-secondary { background: var(--surface-2); color: var(--text); border-color: var(--line); }
-  .btn-sm { padding: 7px 12px; font-size: 0.8rem; }
-  @media (hover: hover) {
-    .btn-secondary:hover { background: var(--surface-3); }
-  }
+/* La miniatura del mapa hace de icono del tablero; si Epic da el icono, va encima. */
+.thumb{position:relative; flex:none; overflow:hidden; display:grid; place-items:center; background:var(--surface-2); border-radius:8px}
+.thumb img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
+.thumb img.icon{object-fit:contain; padding:6%; filter:drop-shadow(0 2px 6px rgba(0,0,0,.6)); z-index:1}
+.thumb.has-icon::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.45))}
+.side-it .thumb{width:28px; height:28px; font-size:14px}
+.hdr .thumb{width:64px; aspect-ratio:16/9; border-radius:10px; font-size:18px}
 
-  .badge { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 999px; font-size: 0.74rem; font-weight: 600; line-height: 1.35; white-space: nowrap; border: 1px solid transparent; }
-  .badge-muted { color: var(--muted); border-color: var(--line); }
-  .badge-amber { background: var(--s-amber); color: var(--k-amber); }
+/* ── Página del mapa ── */
+.gen-date{margin:2px 2px 14px; color:var(--faint); font-size:13.5px; display:flex; align-items:center; flex-wrap:wrap; gap:6px 8px}
+.gen-date strong{color:var(--muted); font-weight:600}
+.sep{color:var(--line)}
+.chip{
+  display:inline-flex; align-items:center; gap:6px; padding:2px 10px; border-radius:99px;
+  background:var(--surface); border:1px solid var(--line-soft); color:var(--muted);
+  font-size:12.5px; font-variant-numeric:tabular-nums; transition:color .16s var(--ease), border-color .16s var(--ease);
+}
+.chip svg{width:12px; height:12px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.chip strong{color:var(--text)}
+button.chip{font-family:var(--mono); font-size:12px; letter-spacing:.02em}
+@media (hover:hover){button.chip:hover{color:var(--text); border-color:var(--line)}}
+button.chip.done{color:var(--k-green); border-color:var(--t-green)}
 
-  .seg { display: inline-flex; align-self: flex-start; max-width: 100%; overflow-x: auto; background: var(--bg-2); border: 1px solid var(--line-soft); border-radius: 999px; padding: 3px; gap: 2px; }
-  .seg button {
-    display: inline-flex; align-items: center; gap: 7px;
-    border: none; background: transparent; color: var(--muted);
-    font-size: 0.8rem; font-weight: 600; padding: 6px 14px; border-radius: 999px; cursor: pointer; white-space: nowrap; flex: none;
-    transition: background-color .16s var(--ease), color .16s var(--ease), transform .3s var(--spring);
-  }
-  @media (hover: hover) { .seg button:not([aria-selected="true"]):hover { color: var(--text); background: rgba(255,255,255,.04); } }
-  .seg button:active { transform: scale(.96); }
-  .seg button[aria-selected="true"] { background: var(--accent-soft); color: var(--accent-t); font-weight: 700; }
+/* Jugadores: Epic cada 10 min (nulo por debajo de 5) y, si no lo tiene, fortnite.gg. */
+.pulse{width:7px; height:7px; border-radius:50%; background:var(--faint); flex:none; position:relative}
+.pulse.on{background:var(--t-green)}
+.pulse.on::after{content:""; position:absolute; inset:-3px; border-radius:50%; border:2px solid var(--t-green); opacity:0; animation:pulso 2s var(--ease-out) infinite}
+@keyframes pulso{0%{transform:scale(.6); opacity:.7} 100%{transform:scale(1.6); opacity:0}}
 
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--faint)); flex: none; }
+/* Una ficha por estadística, como las cifras de General: el color en el punto
+   y no en la ficha. Pulsarla enseña su top. */
+.gen-stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px}
+.gen-stat{--gt:var(--t-slate); position:relative; display:flex; flex-direction:column; gap:4px; padding:42px 20px 16px; border-radius:var(--r-l); color:var(--muted); text-align:left;
+  background:var(--surface); border:1px solid transparent; min-width:0; transition:border-color .16s var(--ease), transform .3s var(--spring)}
+.gen-stat::before{content:''; position:absolute; top:18px; left:20px; width:10px; height:10px; border-radius:99px; background:var(--gt); box-shadow:0 0 0 4px color-mix(in srgb,var(--gt) 22%,transparent)}
+@media (hover:hover){.gen-stat:hover{border-color:color-mix(in srgb,var(--gt) 60%,transparent)}}
+.gen-stat:active{transform:scale(.985)}
+.gen-stat[aria-selected="true"]{border-color:var(--gt); background:color-mix(in srgb,var(--gt) 7%,var(--surface))}
+.gen-n{font-family:var(--display); font-weight:700; font-size:34px; line-height:1.05; color:var(--text); font-variant-numeric:tabular-nums; letter-spacing:-.03em; overflow-wrap:anywhere}
+.gen-l{font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.gen-l strong{color:var(--text); font-weight:600}
+.gen-h{margin:32px 2px 12px; font-family:var(--display); font-size:21px; font-weight:700; letter-spacing:-.015em; color:var(--text); display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
+.gen-h small{font-family:var(--sans); font-size:12.5px; font-weight:400; color:var(--faint); letter-spacing:0}
 
-  /* ── Estructura: mapas a la izquierda, el mapa elegido a la derecha ── */
-  .layout { display: grid; grid-template-columns: 264px minmax(0, 1fr); gap: 20px; align-items: start; }
-  .main { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+/* El top */
+.board{background:var(--surface); border-radius:var(--r-l); overflow:hidden}
+table{width:100%; border-collapse:collapse}
+thead th{color:var(--faint); font-size:12px; font-weight:500; text-align:left; padding:12px 20px 10px; border-bottom:1px solid var(--line-soft)}
+thead th.num{text-align:right}
+tbody td{padding:11px 20px; border-bottom:1px solid var(--line-soft); font-size:14px; color:var(--text); vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+@media (hover:hover){tbody tr:hover{background:rgba(255,255,255,.025)}}
+td.rank{width:60px}
+td.num{text-align:right; font-variant-numeric:tabular-nums; font-weight:700; color:var(--c,var(--text)); white-space:nowrap}
+td.player{overflow-wrap:anywhere}
+.vip{display:inline-flex; margin-left:7px; padding:1px 8px; border-radius:99px; font-size:11px; font-weight:650; letter-spacing:.04em; background:var(--s-amber); color:var(--k-amber); vertical-align:1px}
+.pos{display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%; font-size:12px; font-weight:700; color:var(--faint); font-variant-numeric:tabular-nums}
+.pos.p1{background:rgba(255,196,92,.16); color:#FFC45C}
+.pos.p2{background:rgba(200,205,215,.14); color:#D4D8E0}
+.pos.p3{background:rgba(214,140,90,.16); color:#E7A47A}
+tr.vacia td{color:var(--faint)}
+.empty{padding:40px 20px; text-align:center; color:var(--faint); font-size:14px}
 
-  /* Lista de mapas */
-  .maps { padding: 10px; position: sticky; top: 16px; }
-  .maps > .eyebrow { padding: 6px 8px 8px; }
-  .maps > .seg { display: flex; width: 100%; margin-bottom: 8px; }
-  .maps > .seg button { flex: 1; justify-content: center; padding: 6px 10px; font-size: 0.76rem; }
-  .maps > .seg .n { color: var(--faint); font-weight: 500; }
-  .map-list { display: flex; flex-direction: column; gap: 2px; }
-  .map-item {
-    display: flex; align-items: center; gap: 11px; width: 100%;
-    padding: 8px; border: 1px solid transparent; border-radius: 14px;
-    background: transparent; text-align: left; cursor: pointer;
-    transition: background-color .16s var(--ease), border-color .16s var(--ease);
-  }
-  @media (hover: hover) { .map-item:hover { background: rgba(255,255,255,.04); } }
-  .map-item[aria-selected="true"] { background: var(--surface-2); border-color: var(--line); }
-  .map-item .txt { display: flex; flex-direction: column; min-width: 0; }
-  .map-item .name { font-size: 0.86rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .map-item .sub { font-size: 0.72rem; color: var(--faint); display: flex; align-items: center; gap: 6px; }
-  .map-item[aria-selected="true"] .sub .dot { box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 25%, transparent); }
+.boot{position:fixed; inset:0; z-index:400; display:grid; place-items:center; background:var(--bg); color:var(--muted); font-size:14px}
+.boot-in{display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center; padding:0 24px}
 
-  /* La imagen del mapa: el icono de Epic si existe, si no la miniatura. */
-  .thumb {
-    position: relative; flex: none; overflow: hidden;
-    width: 56px; aspect-ratio: 16 / 9; border-radius: 8px;
-    background: var(--surface-3); border: 1px solid var(--line-soft);
-    display: grid; place-items: center; font-size: 1rem;
-  }
-  .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .thumb img.icon { object-fit: contain; padding: 6%; filter: drop-shadow(0 2px 6px rgba(0,0,0,.6)); }
-  .thumb.has-icon::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.45)); }
-  .thumb.has-icon img.icon { z-index: 1; }
-
-  /* Ficha del mapa */
-  .hero { display: flex; gap: 18px; padding: 16px; align-items: center; }
-  .hero .thumb { width: 200px; border-radius: var(--r-m); font-size: 2.2rem; }
-  .hero .info { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 6px; }
-  .hero .eyebrow { display: flex; align-items: center; gap: 7px; }
-  .hero h2 { font-size: clamp(1.1rem, 2.6vw, 1.4rem); font-weight: 700; letter-spacing: -0.015em; line-height: 1.2; overflow-wrap: anywhere; }
-  .hero .meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 0.82rem; color: var(--muted); }
-  .code-chip {
-    display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
-    padding: 3px 10px; border-radius: 999px; background: var(--bg-2); border: 1px solid var(--line-soft);
-    font-family: var(--mono); font-size: 0.76rem; color: var(--muted); letter-spacing: .02em;
-    transition: color .16s var(--ease), border-color .16s var(--ease);
-  }
-  .code-chip svg { width: 12px; height: 12px; }
-  @media (hover: hover) { .code-chip:hover { color: var(--text); border-color: var(--line); } }
-  .code-chip.done { color: var(--k-green); border-color: var(--t-green); }
-  .hero .actions { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
-
-  /* Jugadores en el mapa: Epic (cada 10 min, nulo por debajo de 5) y, si
-     Epic no lo tiene, fortnite.gg. */
-  .live {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 3px 10px; border-radius: 999px; background: var(--bg-2); border: 1px solid var(--line-soft);
-    font-size: 0.76rem; color: var(--muted); font-variant-numeric: tabular-nums;
-  }
-  .live strong { color: var(--text); font-weight: 600; }
-  .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); flex: none; position: relative; }
-  .pulse.on { background: var(--t-green); }
-  .pulse.on::after {
-    content: ""; position: absolute; inset: -3px; border-radius: 50%;
-    border: 2px solid var(--t-green); opacity: 0; animation: pulso 2s var(--ease-out) infinite;
-  }
-  @keyframes pulso { 0% { transform: scale(.6); opacity: .7; } 100% { transform: scale(1.6); opacity: 0; } }
-  .map-item .sub .pulse { width: 6px; height: 6px; }
-
-  /* Tabla del top */
-  .head-sub { font-size: 0.76rem; color: var(--faint); }
-  table { width: 100%; border-collapse: collapse; }
-  thead th { color: var(--faint); font-size: 0.72rem; font-weight: 500; text-align: left; padding: 9px 18px; border-bottom: 1px solid var(--line-soft); }
-  thead th.num { text-align: right; }
-  tbody td { padding: 10px 18px; border-bottom: 1px solid var(--line-soft); font-size: 0.88rem; color: var(--text); vertical-align: middle; }
-  tbody tr:last-child td { border-bottom: none; }
-  @media (hover: hover) { tbody tr:hover { background: rgba(255,255,255,.025); } }
-  td.rank { width: 56px; }
-  td.num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; color: var(--c, var(--text)); white-space: nowrap; }
-  td.player { overflow-wrap: anywhere; }
-  td.player .badge { margin-left: 6px; vertical-align: 1px; }
-  .pos {
-    display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%;
-    font-size: 0.76rem; font-weight: 700; color: var(--faint); font-variant-numeric: tabular-nums;
-  }
-  .pos.p1 { background: rgba(255,196,92,.16); color: #FFC45C; }
-  .pos.p2 { background: rgba(200,205,215,.14); color: #D4D8E0; }
-  .pos.p3 { background: rgba(214,140,90,.16); color: #E7A47A; }
-  tr.vacia td { color: var(--faint); }
-  .empty { padding: 36px 18px; text-align: center; color: var(--faint); font-size: 0.88rem; }
-
-  .status { padding: 56px 18px; display: flex; flex-direction: column; align-items: center; gap: 14px; color: var(--muted); font-size: 0.9rem; text-align: center; }
-
-  /* Móvil: los mapas pasan a una tira que se desliza */
-  @media (max-width: 860px) {
-    .layout { grid-template-columns: minmax(0, 1fr); }
-    .maps { position: static; padding: 8px; }
-    .maps > .eyebrow { display: none; }
-    .map-list { flex-direction: row; overflow-x: auto; }
-    .map-item { width: auto; flex: none; padding: 6px 12px 6px 6px; }
-    .map-item .thumb { width: 44px; }
-    .map-item .sub { display: none; }
-    .map-item .players-m { display: inline-flex; }
-    .hero { flex-direction: column; align-items: stretch; }
-    .hero .thumb { width: 100%; }
-    .top .right { margin-left: 0; }
-  }
-  @media (max-width: 520px) {
-    tbody td, thead th { padding-left: 12px; padding-right: 12px; }
-    td.rank { width: 44px; }
-  }
-  .players-m { display: none; align-items: center; gap: 5px; font-size: 0.72rem; color: var(--faint); font-weight: 500; margin-left: 2px; }
-  .players-m .pulse { width: 6px; height: 6px; }
-  @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; }
-    .pulse.on::after { animation: none; }
-  }
+/* Estrecho: la barra es un cajón que abre el menú de la cabecera. */
+@media (max-width:899.98px){
+  body.shell .app{margin-left:0}
+  .side{transform:translateX(-102%); transition:transform .4s var(--spring-soft); z-index:120; box-shadow:var(--shadow); width:min(300px,86vw);
+    padding-top:calc(14px + env(safe-area-inset-top,0px)); padding-left:max(10px,env(safe-area-inset-left,0px))}
+  body.side-open .side{transform:none}
+  .side-scrim{display:block; position:fixed; inset:0; z-index:119; background:var(--scrim); opacity:0; pointer-events:none; transition:opacity .25s var(--ease)}
+  body.side-open .side-scrim{opacity:1; pointer-events:auto}
+  .side-it{min-height:44px}
+  .hdr-menu{display:grid}
+  .hdr .thumb{width:48px}
+}
+/* Ancho: la barra va sobre el negro de fuera y la página dentro de un panel
+   redondeado, que es su propia caja de scroll (igual que el kanban). */
+@media (min-width:900px){
+  body.shell::after{content:''; position:fixed; z-index:55; inset:var(--fr) var(--fr) var(--fr) var(--side-w); pointer-events:none;
+    border-radius:var(--r-frame); box-shadow:0 0 0 100vmax var(--frame)}
+  body.shell{overflow:hidden; height:100dvh; min-height:0; padding-top:var(--fr)}
+  body.shell .app{margin:0 var(--fr) 0 var(--side-w); height:calc(100dvh - 2 * var(--fr)); min-height:0;
+    overflow-y:auto; overflow-x:hidden; overscroll-behavior:contain; border-radius:var(--r-frame)}
+  body.shell .hdr{top:0; border-radius:var(--r-frame) var(--r-frame) 0 0; border-bottom:0; background:color-mix(in srgb,var(--bg) 94%,transparent)}
+  body.shell .hdr-row{min-height:86px; padding-top:20px}
+  body.shell .hdr-row h1{font-size:31px; letter-spacing:-.03em}
+  body.shell .hdr-in,body.shell .page{padding-inline:40px; max-width:none}
+  body.shell .gen-date{margin-top:-6px}
+  body.shell .hdr .icon-btn{width:40px; height:40px; border-radius:99px; background:var(--surface); box-shadow:inset 0 0 0 1px var(--line-soft)}
+  body.shell .hdr .icon-btn svg{width:19px; height:19px}
+  @media (hover:hover){body.shell .hdr .icon-btn:hover{background:var(--surface-2); box-shadow:inset 0 0 0 1px var(--line)}}
+}
+@media (max-width:520px){
+  .gen-stats{grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px}
+  .gen-stat{padding:34px 12px 12px} .gen-stat::before{top:14px; left:12px}
+  .gen-n{font-size:22px} .gen-l{font-size:12px} .gen-h{font-size:17px; margin-top:26px}
+  tbody td,thead th{padding-left:12px; padding-right:12px} td.rank{width:46px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important}
+  .pulse.on::after{animation:none}
+}
 </style>
 </head>
-<body>
-<div class="shell">
-  <header class="top">
-    <span class="logo" id="logo"></span>
-    <div>
-      <div class="eyebrow">STONKS · Leaderboards</div>
-      <h1>Leaderboards</h1>
-    </div>
-    <span class="right badge badge-muted" id="updated" hidden></span>
-  </header>
-  <p class="lede">El top de cada mapa y estadística, tal y como está ahora.</p>
-
-  <div class="layout" id="layout" hidden>
-    <nav class="card maps" aria-label="Mapas">
-      <div class="eyebrow" id="mapsTitle">Mapas</div>
-      <div class="seg sin-barra" id="creators" role="tablist" aria-label="Creadores" hidden></div>
-      <div class="map-list sin-barra" id="mapList" role="tablist" aria-orientation="vertical"></div>
-    </nav>
-    <main class="main">
-      <section class="card hero" id="hero" aria-live="polite"></section>
-      <div class="seg sin-barra" id="stats" role="tablist" aria-label="Estadísticas"></div>
-      <section class="card" id="board"></section>
-    </main>
+<body class="shell">
+<nav class="side" id="side" aria-label="Mapas">
+  <div class="side-brand" id="brand">
+    <a class="side-logo" href="https://stonksstudio.com" aria-label="Ir a la web de STONKS (stonksstudio.com)"><span class="logo" id="logo"></span></a>
+    <span>STONKS LEADERBOARDS</span>
   </div>
+  <div class="side-mid" id="sideMid"></div>
+  <div class="side-foot" id="sideFoot" hidden></div>
+</nav>
+<div class="side-scrim" id="scrim"></div>
 
-  <div class="card status" id="status"><span id="statusChispa"></span><span id="statusText">Cargando leaderboards…</span></div>
-
+<div class="app" id="app" hidden>
+  <header class="hdr">
+    <div class="hdr-in"><div class="hdr-row">
+      <button class="icon-btn hdr-menu" id="menuBtn" type="button" aria-label="Mapas" aria-controls="side" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      </button>
+      <span id="hdrThumb"></span>
+      <div class="hdr-t"><h1 id="title"></h1></div>
+      <a class="icon-btn" id="ggLink" target="_blank" rel="noopener" aria-label="Ver en fortnite.gg" title="Ver en fortnite.gg" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+      </a>
+    </div></div>
+  </header>
+  <main class="page">
+    <p class="gen-date" id="meta"></p>
+    <div class="gen-stats" id="stats" role="tablist" aria-label="Estadísticas"></div>
+    <h2 class="gen-h" id="boardTitle"></h2>
+    <section class="board" id="board"></section>
+  </main>
 </div>
+
+<div class="boot" id="boot"><div class="boot-in"><span id="bootChispa"></span><span id="bootText" hidden></span></div></div>
 
 <script>
 const $ = id => document.getElementById(id);
-const state = { data: null, game: 0, stat: 0 };
-
-const ICON = {
-  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
-  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>',
-  ext: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>',
+const state = { data: null, game: 0, stat: 0, live: {} };
+const SVG = {
+  chev: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>',
+  copy: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>',
 };
 
-/* La chispa: logo quieto, icono de la pestaña y la de carga. */
-if (typeof chispaSVG === 'function') {
-  $('logo').innerHTML = chispaSVG({ color: 'var(--accent)', tam: 32, titulo: 'STONKS' });
+if (typeof chispaCarga === 'function') {
   faviconChispa();
-  state.carga = chispaCarga($('statusChispa'), { tam: 36 });
+  state.carga = chispaCarga($('bootChispa'), { tam: 32, etiqueta: 'Cargando' });
+  chispaCarga($('logo'), { clase: 'logo', tam: 0, etiqueta: null, reducido: 'quieta' });
 }
 
 function escapeHtml(s) {
@@ -252,14 +257,13 @@ function escapeHtml(s) {
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-/* Solo se pintan imágenes del CDN de Epic y colores #rrggbb: lo demás del
-   JSON no llega a un atributo. */
+/* Del JSON solo llegan a un atributo imágenes del CDN de Epic y colores #rrggbb. */
 const safeImg = u => /^https:\/\/cdn-\d+\.qstv\.on\.epicgames\.com\/[\w\/.-]+$/.test(String(u || '')) ? u : null;
 const safeColor = c => /^#[0-9a-f]{6}$/i.test(String(c || '')) ? c : null;
 const islandCode = g => (g.island && /^\d{4}-\d{4}-\d{4}$/.test(g.island.code)) ? g.island.code : null;
 const islandUrl = code => 'https://fortnite.gg/island?code=' + code;
+const fmtN = n => Number(n).toLocaleString('es-ES');
 
-/* «2026-10-14 22:08 UTC» → «hace 3 h» (con la fecha entera en el title). */
 function parseUpdated(s) {
   const m = String(s || '').match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})/);
   return m ? new Date(m[1] + 'T' + m[2] + ':00Z') : null;
@@ -274,21 +278,88 @@ function relTime(d) {
   const dias = Math.round(h / 24);
   return 'hace ' + dias + (dias === 1 ? ' día' : ' días');
 }
-function localDate(d) {
-  return d && !isNaN(d) ? d.toLocaleString('es-ES', { dateStyle: 'medium', timeStyle: 'short' }) : '';
-}
+const localDate = d => d && !isNaN(d) ? d.toLocaleString('es-ES', { dateStyle: 'medium', timeStyle: 'short' }) : '';
+const releasedText = iso => {
+  const d = /^\d{4}-\d{2}-\d{2}$/.test(iso || '') ? new Date(iso + 'T12:00:00Z') : null;
+  return d ? d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+};
 
-/* La imagen del mapa: el icono (logo transparente) encima de la miniatura
-   si Epic lo da; si no, solo la miniatura; si no hay nada, el emoji. */
-function thumbHtml(g, cls = '') {
+function thumbHtml(g) {
   const isl = g.island || {};
   const thumb = safeImg(isl.thumb), icon = safeImg(isl.icon);
-  const alt = escapeHtml(isl.name || g.name);
-  if (!thumb && !icon) return '<span class="thumb ' + cls + '" aria-hidden="true">' + escapeHtml(g.emoji || '🎮') + '</span>';
-  return '<span class="thumb ' + cls + (icon ? ' has-icon' : '') + '">' +
-    (thumb ? '<img src="' + thumb + '" alt="' + (icon ? '' : alt) + '" loading="lazy" decoding="async">' : '') +
-    (icon ? '<img class="icon" src="' + icon + '" alt="' + alt + '" loading="lazy" decoding="async">' : '') +
+  if (!thumb && !icon) return '<span class="thumb" aria-hidden="true">' + escapeHtml(g.emoji || '🎮') + '</span>';
+  return '<span class="thumb' + (icon ? ' has-icon' : '') + '" aria-hidden="true">' +
+    (thumb ? '<img src="' + thumb + '" alt="" loading="lazy" decoding="async">' : '') +
+    (icon ? '<img class="icon" src="' + icon + '" alt="" loading="lazy" decoding="async">' : '') +
     '</span>';
+}
+
+/* ── Carpetas por creador; dentro, del mapa más nuevo al más viejo ── */
+const CREATOR_ORDER = ['dani280n2', 'sonoq', 'aidenomalley'];
+const creatorOf = g => (g.island && g.island.creator) || '';
+function creatorGroups() {
+  const by = new Map();
+  state.data.games.forEach((g, i) => {
+    const c = creatorOf(g);
+    if (!by.has(c)) by.set(c, []);
+    by.get(c).push(i);
+  });
+  const rank = c => {
+    if (!c) return Infinity;
+    const i = CREATOR_ORDER.indexOf(c.toLowerCase());
+    return i < 0 ? CREATOR_ORDER.length : i;
+  };
+  const released = i => (state.data.games[i].island || {}).released || '';
+  return [...by.entries()]
+    .sort(([a], [b]) => rank(a) - rank(b) || a.localeCompare(b))
+    .map(([creator, games]) => ({
+      creator,
+      games: games.sort((a, b) => released(b).localeCompare(released(a)) || a - b),
+    }));
+}
+
+/* Plegar una carpeta es de cada uno: se recuerda en el navegador. */
+const FOLD_KEY = 'stonks-leaderboards-folds';
+const FOLDS = new Set((() => { try { return JSON.parse(localStorage.getItem(FOLD_KEY) || '[]'); } catch (_) { return []; } })());
+const saveFolds = () => { try { localStorage.setItem(FOLD_KEY, JSON.stringify([...FOLDS])); } catch (_) {} };
+
+function renderSide() {
+  const mid = $('sideMid'), y = mid.scrollTop;
+  let html = '<div class="side-sec">Mapas</div>';
+  creatorGroups().forEach((gr, gi) => {
+    const id = gr.creator || '_sin';
+    const open = !FOLDS.has(id);
+    html += '<button class="side-fold" type="button" data-fold="' + escapeHtml(id) + '" aria-expanded="' + open + '" aria-controls="sg-' + gi + '">' +
+      '<span class="side-chev">' + SVG.chev + '</span><span class="side-fl">' + escapeHtml(gr.creator || 'Sin creador') + '</span>' +
+      (open ? '' : '<span class="side-n">' + gr.games.length + '</span>') + '</button>' +
+      '<div class="side-grp" id="sg-' + gi + '"' + (open ? '' : ' hidden') + '>' +
+      gr.games.map(i => {
+        const g = state.data.games[i];
+        return '<a class="side-it' + (i === state.game ? ' on' : '') + '" href="#' + encodeURIComponent(g.key) + '"' +
+          (i === state.game ? ' aria-current="page"' : '') + ' data-i="' + i + '">' +
+          thumbHtml(g) + '<span class="side-l side-pn">' + escapeHtml(g.name) + '</span>' +
+          '<span class="side-cnt" data-live="' + escapeHtml(g.key) + '"></span></a>';
+      }).join('') + '</div>';
+  });
+  mid.innerHTML = html;
+  mid.scrollTop = y;
+  mid.querySelectorAll('[data-fold]').forEach(b => b.onclick = () => {
+    const f = b.dataset.fold;
+    FOLDS.has(f) ? FOLDS.delete(f) : FOLDS.add(f);
+    saveFolds();
+    renderSide();
+  });
+  mid.querySelectorAll('.side-it').forEach(a => a.onclick = e => {
+    e.preventDefault();
+    sideOpen(false);
+    select(+a.dataset.i, 0);
+  });
+  renderLive();
+}
+
+function sideOpen(open) {
+  document.body.classList.toggle('side-open', open);
+  $('menuBtn').setAttribute('aria-expanded', String(open));
 }
 
 /* ── Selección en la URL (#juego/stat) para poder enlazar y recargar ── */
@@ -308,155 +379,57 @@ function writeHash() {
   const g = state.data.games[state.game], s = g.stats[state.stat];
   history.replaceState(null, '', '#' + g.key + (s ? '/' + s.key : ''));
 }
-
-async function load() {
-  try {
-    const res = await fetch('widgets.json?t=' + Date.now());
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    state.data = await res.json();
-  } catch (e) {
-    return showStatus('No pude cargar widgets.json (' + e.message + ').');
-  }
-  if (!state.data.games || !state.data.games.length) {
-    return showStatus('Aún no hay leaderboards. Vuelve cuando el bot haya corrido.');
-  }
-  readHash();
-  $('status').hidden = true;
-  if (state.carga) state.carga.parar();
-  $('layout').hidden = false;
-
-  const d = parseUpdated(state.data.updated);
-  if (d) {
-    const u = $('updated');
-    u.hidden = false;
-    u.textContent = 'Actualizado ' + relTime(d);
-    u.title = localDate(d);
-  }
-  render();
-  refreshPlayers();
-  setInterval(() => { if (!document.hidden) refreshPlayers(); }, PLAYERS_EVERY_MS);
-}
-
-function showStatus(msg) {
-  if (state.carga) state.carga.parar();
-  $('statusChispa').hidden = true;
-  $('statusText').textContent = msg;
-}
-
 function select(game, stat) {
   state.game = game;
   state.stat = stat;
   writeHash();
   render();
+  $('app').scrollTo({ top: 0 });
 }
 
 function render() {
-  renderCreators();
-  renderMaps();
-  renderHero();
+  renderSide();
+  renderHeader();
   renderStats();
   renderBoard();
 }
 
-/* Los mapas van por creador (cada uno en su pestaña) y, dentro, del más
-   nuevo al más viejo según la fecha de lanzamiento de fortnite.gg. */
-const CREATOR_ORDER = ['dani280n2', 'sonoq', 'aidenomalley'];
-const creatorOf = g => (g.island && g.island.creator) || '';
-
-function creatorGroups() {
-  const byCreator = new Map();
-  state.data.games.forEach((g, i) => {
-    const c = creatorOf(g);
-    if (!byCreator.has(c)) byCreator.set(c, []);
-    byCreator.get(c).push(i);
-  });
-  const rank = c => {
-    if (!c) return Infinity;
-    const i = CREATOR_ORDER.indexOf(c.toLowerCase());
-    return i < 0 ? CREATOR_ORDER.length : i;
-  };
-  const released = i => (state.data.games[i].island || {}).released || '';
-  return [...byCreator.entries()]
-    .sort(([a], [b]) => rank(a) - rank(b) || a.localeCompare(b))
-    .map(([creator, games]) => ({
-      creator,
-      games: games.sort((a, b) => released(b).localeCompare(released(a)) || a - b),
-    }));
-}
-
-function renderCreators() {
-  const groups = creatorGroups();
-  const cont = $('creators');
-  const show = groups.length > 1;
-  cont.hidden = !show;
-  $('mapsTitle').hidden = show;
-  if (!show) return;
-  const current = creatorOf(state.data.games[state.game]);
-  cont.innerHTML = groups.map((gr, i) =>
-    '<button type="button" role="tab" data-i="' + i + '" aria-selected="' + (gr.creator === current) + '">' +
-      escapeHtml(gr.creator || 'Otros') + ' <span class="n">' + gr.games.length + '</span></button>'
-  ).join('');
-  cont.querySelectorAll('button').forEach(b => b.onclick = () => select(groups[+b.dataset.i].games[0], 0));
-}
-
-function renderMaps() {
-  const cont = $('mapList');
-  const current = creatorOf(state.data.games[state.game]);
-  const group = creatorGroups().find(gr => gr.creator === current);
-  cont.innerHTML = group.games.map(i => {
-    const g = state.data.games[i];
-    const n = (g.stats || []).length;
-    const color = safeColor(g.color);
-    return '<button class="map-item" role="tab" data-i="' + i + '" aria-selected="' + (i === state.game) + '"' +
-      (color ? ' style="--c:' + color + '"' : '') + '>' +
-      thumbHtml(g) +
-      '<span class="txt"><span class="name">' + escapeHtml(g.name) + '</span>' +
-      '<span class="sub" data-live="' + escapeHtml(g.key) + '"><span class="dot"></span>' +
-        n + (n === 1 ? ' estadística' : ' estadísticas') + '</span></span>' +
-      '<span class="players-m" data-live-m="' + escapeHtml(g.key) + '"></span>' +
-    '</button>';
-  }).join('');
-  cont.querySelectorAll('.map-item').forEach(b => b.onclick = () => select(+b.dataset.i, 0));
-  const sel = cont.querySelector('[aria-selected="true"]');
-  if (sel && cont.scrollWidth > cont.clientWidth) sel.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-  renderLive();
-}
-
-function renderHero() {
+function renderHeader() {
   const g = state.data.games[state.game];
   const isl = g.island || {};
   const code = islandCode(g);
-  const color = safeColor(g.color);
-  const official = isl.name && isl.name.toLowerCase() !== String(g.name).toLowerCase();
-  $('hero').innerHTML =
-    (code ? '<a href="' + islandUrl(code) + '" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">' + thumbHtml(g) + '</a>' : thumbHtml(g)) +
-    '<div class="info">' +
-      '<div class="eyebrow"' + (color ? ' style="--c:' + color + '"' : '') + '><span class="dot"></span>' +
-        escapeHtml(official ? g.name : 'Mapa') + '</div>' +
-      '<h2>' + escapeHtml(isl.name || g.name) + '</h2>' +
-      '<div class="meta">' +
-        (code ? '<button type="button" class="code-chip" id="codeChip" title="Copiar el código de isla">' + ICON.copy + escapeHtml(code) + '</button>' : '') +
-        (code ? '<span class="live" id="heroLive" hidden></span>' : '') +
-        (isl.creator ? '<span>de <strong>' + escapeHtml(isl.creator) + '</strong></span>' : '') +
-      '</div>' +
-      (code ? '<div class="actions"><a class="btn btn-secondary btn-sm" href="' + islandUrl(code) + '" target="_blank" rel="noopener">' +
-        ICON.ext + 'Ver en fortnite.gg</a></div>' : '') +
-    '</div>';
+  $('hdrThumb').innerHTML = thumbHtml(g);
+  $('title').textContent = isl.name || g.name;
+  document.title = (isl.name || g.name) + ' · LEADERBOARDS STONKS';
+  const link = $('ggLink');
+  link.hidden = !code;
+  if (code) link.href = islandUrl(code);
+
+  const text = [];
+  if (isl.creator) text.push('<span>de <strong>' + escapeHtml(isl.creator) + '</strong></span>');
+  const rel = releasedText(isl.released);
+  if (rel) text.push('<span>lanzado el ' + escapeHtml(rel) + '</span>');
+  $('meta').innerHTML = text.join('<span class="sep" aria-hidden="true">·</span>') +
+    (code ? '<button type="button" class="chip" id="codeChip" title="Copiar el código de isla">' + SVG.copy + escapeHtml(code) + '</button>' +
+      '<span class="chip" id="heroLive" hidden></span>' : '');
   const chip = $('codeChip');
-  if (chip) chip.onclick = () => copyText(code, () => flash(chip, ICON.check + 'Copiado', ICON.copy + escapeHtml(code)));
+  if (chip) chip.onclick = () => copyText(code, () => flash(chip, SVG.check + 'Copiado', SVG.copy + escapeHtml(code)));
   renderLive();
 }
 
 function renderStats() {
   const g = state.data.games[state.game];
   const cont = $('stats');
-  cont.hidden = (g.stats || []).length < 2;
   cont.innerHTML = (g.stats || []).map((s, i) => {
     const c = safeColor(s.color);
-    return '<button type="button" role="tab" data-i="' + i + '" aria-selected="' + (i === state.stat) + '">' +
-      '<span class="dot"' + (c ? ' style="--c:' + c + '"' : '') + '></span>' + escapeHtml(s.title) + '</button>';
+    const top = (s.rows || []).find(r => r && r.name);
+    return '<button type="button" class="gen-stat" role="tab" data-i="' + i + '" aria-selected="' + (i === state.stat) + '"' +
+      (c ? ' style="--gt:' + c + '"' : '') + '>' +
+      '<span class="gen-n">' + escapeHtml(top ? top.value : '—') + '</span>' +
+      '<span class="gen-l">' + escapeHtml(s.title) + (top ? ' · <strong>' + escapeHtml(top.name) + '</strong>' : ' · sin récords') + '</span>' +
+    '</button>';
   }).join('');
-  cont.querySelectorAll('button').forEach(b => b.onclick = () => select(state.game, +b.dataset.i));
+  cont.querySelectorAll('.gen-stat').forEach(b => b.onclick = () => select(state.game, +b.dataset.i));
 }
 
 function renderBoard() {
@@ -464,6 +437,7 @@ function renderBoard() {
   const s = (g.stats || [])[state.stat];
   const board = $('board');
   if (!s) {
+    $('boardTitle').textContent = '';
     board.innerHTML = '<div class="empty">Este mapa no tiene estadísticas.</div>';
     return;
   }
@@ -472,29 +446,21 @@ function renderBoard() {
   const rows = s.rows || [];
   const filled = rows.filter(r => r && r.name).length;
   const d = parseUpdated(s.updated);
+  $('boardTitle').innerHTML = escapeHtml(filled ? 'Top ' + filled : 'Top') +
+    '<small' + (d ? ' title="' + escapeHtml(localDate(d)) + '"' : '') + '>' + escapeHtml(s.title) + ' · actualizado ' + escapeHtml(relTime(d)) + '</small>';
 
-  let body;
   if (!filled) {
-    body = '<div class="empty">Aún no hay récords en esta estadística.</div>';
-  } else {
-    body = '<table><thead><tr><th>#</th><th>Jugador</th><th class="num">' + escapeHtml(s.title) + '</th></tr></thead><tbody>' +
-      rows.map((r, i) => {
-        const pos = '<span class="pos' + (i < 3 ? ' p' + (i + 1) : '') + '">' + (i + 1) + '</span>';
-        if (!r || !r.name) return '<tr class="vacia"><td class="rank">' + pos + '</td><td>—</td><td class="num"></td></tr>';
-        return '<tr><td class="rank">' + pos + '</td>' +
-          '<td class="player">' + escapeHtml(r.name) + (r.isVip ? '<span class="badge badge-amber">VIP</span>' : '') + '</td>' +
-          '<td class="num">' + escapeHtml(r.value || '') + '</td></tr>';
-      }).join('') +
-      '</tbody></table>';
+    board.innerHTML = '<div class="empty">Aún no hay récords en esta estadística.</div>';
+    return;
   }
-
-  board.innerHTML =
-    '<div class="card-head">' +
-      '<span class="dot"></span>' +
-      '<div><h3>' + escapeHtml(s.title) + '</h3>' +
-      '<div class="head-sub"' + (d ? ' title="' + escapeHtml(localDate(d)) + '"' : '') + '>' +
-        (filled ? 'Top ' + filled : 'Sin récords') + ' · actualizado ' + escapeHtml(relTime(d)) + '</div></div>' +
-    '</div>' + body;
+  board.innerHTML = '<table><thead><tr><th>#</th><th>Jugador</th><th class="num">' + escapeHtml(s.title) + '</th></tr></thead><tbody>' +
+    rows.map((r, i) => {
+      const pos = '<span class="pos' + (i < 3 ? ' p' + (i + 1) : '') + '">' + (i + 1) + '</span>';
+      if (!r || !r.name) return '<tr class="vacia"><td class="rank">' + pos + '</td><td>—</td><td class="num"></td></tr>';
+      return '<tr><td class="rank">' + pos + '</td>' +
+        '<td class="player">' + escapeHtml(r.name) + (r.isVip ? '<span class="vip">VIP</span>' : '') + '</td>' +
+        '<td class="num">' + escapeHtml(r.value || '') + '</td></tr>';
+    }).join('') + '</tbody></table>';
 }
 
 function flash(el, html, back) {
@@ -503,12 +469,10 @@ function flash(el, html, back) {
   clearTimeout(el._t);
   el._t = setTimeout(() => { el.innerHTML = back; el.classList.remove('done'); }, 1600);
 }
-
 async function copyText(text, ok) {
   try {
     await navigator.clipboard.writeText(text);
   } catch (e) {
-    // Navegadores sin Clipboard API (o sin https)
     const ta = document.createElement('textarea');
     ta.value = text;
     ta.style.position = 'fixed';
@@ -530,7 +494,6 @@ async function copyText(text, ok) {
 const EPIC = 'https://api.fortnite.com/ecosystem/v1/islands/';
 const LECTOR = 'https://r.jina.ai/';
 const PLAYERS_EVERY_MS = 3 * 60 * 1000;
-state.live = {};
 
 async function getJson(url, opts = {}) {
   const ctrl = new AbortController();
@@ -546,7 +509,6 @@ async function getJson(url, opts = {}) {
     clearTimeout(t);
   }
 }
-
 const values = j => ((j && j.intervals) || []).filter(i => typeof i.value === 'number');
 
 async function epicPlayers(code) {
@@ -595,40 +557,69 @@ async function refreshPlayers() {
   }));
 }
 
-const fmtN = n => Number(n).toLocaleString('es-ES');
-
-function playersText(p) {
-  if (p.under5) return 'Menos de 5 jugando';
-  return fmtN(p.now) + ' jugando';
-}
-
 function renderLive() {
   if (!state.data) return;
   state.data.games.forEach(g => {
     const p = state.live[g.key];
-    if (!p || p.none) return;
+    const cnt = document.querySelector('[data-live="' + CSS.escape(g.key) + '"]');
+    if (!cnt || !p || p.none) return;
     const on = !p.under5 && p.now > 0;
-    const sub = document.querySelector('[data-live="' + CSS.escape(g.key) + '"]');
-    if (sub) sub.innerHTML = '<span class="pulse' + (on ? ' on' : '') + '"></span>' + escapeHtml(playersText(p));
-    const mob = document.querySelector('[data-live-m="' + CSS.escape(g.key) + '"]');
-    if (mob) mob.innerHTML = '<span class="pulse' + (on ? ' on' : '') + '"></span>' + escapeHtml(p.under5 ? '<5' : fmtN(p.now));
+    cnt.innerHTML = '<span class="pulse' + (on ? ' on' : '') + '"></span>' + escapeHtml(p.under5 ? '<5' : fmtN(p.now));
+    cnt.setAttribute('aria-label', (p.under5 ? 'menos de 5' : fmtN(p.now)) + ' jugando');
   });
 
-  const hero = $('heroLive');
-  if (!hero) return;
-  const g = state.data.games[state.game];
-  const p = state.live[g.key];
-  hero.hidden = !p || !!p.none;
-  if (hero.hidden) return;
+  const live = $('heroLive');
+  if (!live) return;
+  const p = state.live[state.data.games[state.game].key];
+  live.hidden = !p || !!p.none;
+  if (live.hidden) return;
   const on = !p.under5 && p.now > 0;
-  hero.innerHTML = '<span class="pulse' + (on ? ' on' : '') + '"></span>' +
+  live.innerHTML = '<span class="pulse' + (on ? ' on' : '') + '"></span>' +
     (p.under5 ? '<span>&lt; <strong>5</strong> jugando</span>' : '<span><strong>' + fmtN(p.now) + '</strong> jugando</span>');
-  hero.title = [
+  live.title = [
     p.src + (p.at && p.src === 'Epic' ? ', ' + relTime(p.at) : ''),
     p.peak24 != null ? 'pico 24 h: ' + fmtN(p.peak24) : '',
   ].filter(Boolean).join(' · ');
 }
 
+async function load() {
+  try {
+    const res = await fetch('widgets.json?t=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    state.data = await res.json();
+  } catch (e) {
+    return bootMsg('No pude cargar los leaderboards (' + e.message + ').');
+  }
+  if (!state.data.games || !state.data.games.length) {
+    return bootMsg('Aún no hay leaderboards. Vuelve cuando el bot haya corrido.');
+  }
+  readHash();
+  const d = parseUpdated(state.data.updated);
+  if (d) {
+    const foot = $('sideFoot');
+    foot.hidden = false;
+    foot.textContent = 'Actualizado ' + relTime(d);
+    foot.title = localDate(d);
+  }
+  $('app').hidden = false;
+  $('boot').hidden = true;
+  if (state.carga) state.carga.parar();
+  render();
+  refreshPlayers();
+  setInterval(() => { if (!document.hidden) refreshPlayers(); }, PLAYERS_EVERY_MS);
+}
+
+function bootMsg(msg) {
+  if (state.carga) state.carga.parar();
+  $('bootChispa').hidden = true;
+  $('bootText').hidden = false;
+  $('bootText').textContent = msg;
+}
+
+$('menuBtn').onclick = () => sideOpen(!document.body.classList.contains('side-open'));
+$('scrim').onclick = () => sideOpen(false);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') sideOpen(false); });
+$('sideMid').addEventListener('scroll', () => $('brand').classList.toggle('lift', $('sideMid').scrollTop > 2));
 window.addEventListener('hashchange', () => { if (state.data) { readHash(); render(); } });
 load();
 </script>
