@@ -131,9 +131,20 @@ button.chip.done{color:var(--k-green); border-color:var(--t-green)}
 .pulse.on::after{content:""; position:absolute; inset:-3px; border-radius:50%; border:2px solid var(--t-green); opacity:0; animation:pulso 2s var(--ease-out) infinite}
 @keyframes pulso{0%{transform:scale(.6); opacity:.7} 100%{transform:scale(1.6); opacity:0}}
 
-/* Todos los leaderboards del mapa a la vista, uno por estadística. */
-.boards{display:grid; gap:16px; margin-top:6px}
-@media (min-width:1100px){.boards{grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start}}
+/* Las estadísticas como el control segmentado de las columnas del kanban. */
+.seg{display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); gap:2px;
+  padding:3px; margin:6px 0 12px; background:var(--surface-2); border-radius:14px; overflow-x:auto; scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.seg.many{grid-auto-columns:minmax(110px,1fr)}
+.seg-tab{min-height:46px; min-width:0; border-radius:11px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:4px 8px; color:var(--muted); transition:color .2s var(--ease), background .2s var(--ease)}
+@media (hover:hover){.seg-tab:not([aria-selected="true"]):hover{color:var(--text)}}
+.seg-tab .nm{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; line-height:1.3}
+.seg-tab .nm i{width:7px; height:7px; border-radius:99px; flex:none; background:var(--c,var(--faint))}
+.seg-tab .ct{font-size:11.5px; font-variant-numeric:tabular-nums; color:var(--faint); line-height:1.3}
+.seg-tab[aria-selected="true"]{color:var(--text); background:#37373D; box-shadow:0 1px 2px rgba(40,35,25,.1),0 3px 10px -4px rgba(40,35,25,.18)}
+.seg-tab[aria-selected="true"] .ct{color:var(--muted)}
+.seg-tab:focus-visible{outline-offset:-2px; border-radius:11px}
 .board{--c:var(--t-slate); background:var(--surface); border-radius:var(--r-l); overflow:hidden; min-width:0}
 .board-h{display:flex; align-items:center; gap:10px; padding:16px 20px 12px}
 .board-h::before{content:''; width:10px; height:10px; border-radius:99px; flex:none; background:var(--c); box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 22%,transparent)}
@@ -223,7 +234,8 @@ tr.vacia td{color:var(--faint)}
   </header>
   <main class="page">
     <p class="gen-date" id="meta"></p>
-    <div class="boards" id="boards"></div>
+    <div class="seg" id="stats" role="tablist" aria-label="Estadísticas"></div>
+    <div id="boards"></div>
   </main>
 </div>
 
@@ -231,7 +243,7 @@ tr.vacia td{color:var(--faint)}
 
 <script>
 const $ = id => document.getElementById(id);
-const state = { data: null, game: 0, live: {} };
+const state = { data: null, game: 0, stat: 0, live: {} };
 const SVG = {
   chev: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>',
   copy: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
@@ -345,7 +357,7 @@ function renderSide() {
   mid.querySelectorAll('.side-it').forEach(a => a.onclick = e => {
     e.preventDefault();
     sideOpen(false);
-    select(+a.dataset.i);
+    select(+a.dataset.i, 0);
   });
   renderLive();
 }
@@ -355,15 +367,19 @@ function sideOpen(open) {
   $('menuBtn').setAttribute('aria-expanded', String(open));
 }
 
-/* ── El mapa elegido va en la URL (#juego) para poder enlazar y recargar ── */
+/* ── Mapa y estadística en la URL (#juego/stat) para poder enlazar y recargar ── */
 function readHash() {
-  const gk = decodeURIComponent(location.hash.slice(1)).split('/')[0];
+  const [gk, sk] = decodeURIComponent(location.hash.slice(1)).split('/');
   const gi = state.data.games.findIndex(g => g.key === gk);
   state.game = gi < 0 ? creatorGroups()[0].games[0] : gi;
+  const si = (state.data.games[state.game].stats || []).findIndex(s => s.key === sk);
+  state.stat = si < 0 ? 0 : si;
 }
-function select(game) {
+function select(game, stat) {
   state.game = game;
-  history.replaceState(null, '', '#' + state.data.games[game].key);
+  state.stat = stat;
+  const g = state.data.games[game], s = (g.stats || [])[stat];
+  history.replaceState(null, '', '#' + g.key + (s ? '/' + s.key : ''));
   render();
   $('app').scrollTo({ top: 0 });
 }
@@ -371,7 +387,8 @@ function select(game) {
 function render() {
   renderSide();
   renderHeader();
-  renderBoards();
+  renderTabs();
+  renderBoard();
 }
 
 function renderHeader() {
@@ -397,31 +414,46 @@ function renderHeader() {
   renderLive();
 }
 
-function renderBoards() {
+const filledOf = s => (s.rows || []).filter(r => r && r.name).length;
+
+function renderTabs() {
+  const stats = state.data.games[state.game].stats || [];
+  const cont = $('stats');
+  cont.hidden = stats.length < 2;
+  cont.classList.toggle('many', stats.length > 3);
+  cont.innerHTML = stats.map((s, i) => {
+    const c = safeColor(s.color), n = filledOf(s);
+    return '<button type="button" class="seg-tab" role="tab" data-i="' + i + '" aria-selected="' + (i === state.stat) + '"' +
+      (c ? ' style="--c:' + c + '"' : '') + '>' +
+      '<span class="nm"><i></i>' + escapeHtml(s.title) + '</span>' +
+      '<span class="ct">' + (n ? 'Top ' + n : 'sin récords') + '</span></button>';
+  }).join('');
+  cont.querySelectorAll('.seg-tab').forEach(b => b.onclick = () => select(state.game, +b.dataset.i));
+}
+
+function renderBoard() {
   const g = state.data.games[state.game];
-  const stats = g.stats || [];
-  if (!stats.length) {
+  const s = (g.stats || [])[state.stat];
+  if (!s) {
     $('boards').innerHTML = '<section class="board"><div class="empty">Este mapa no tiene estadísticas.</div></section>';
     return;
   }
-  $('boards').innerHTML = stats.map(s => {
-    const c = safeColor(s.color);
-    const rows = s.rows || [];
-    const filled = rows.filter(r => r && r.name).length;
-    const head = '<div class="board-h"><h2>' + escapeHtml(s.title) + '</h2>' +
-      (filled ? '<small>Top ' + filled + '</small>' : '') + '</div>';
-    const body = !filled
-      ? '<div class="empty">Aún no hay récords.</div>'
-      : '<table><thead><tr><th>#</th><th>Jugador</th><th class="num">' + escapeHtml(s.title) + '</th></tr></thead><tbody>' +
-        rows.map((r, i) => {
-          const pos = '<span class="pos' + (i < 3 ? ' p' + (i + 1) : '') + '">' + (i + 1) + '</span>';
-          if (!r || !r.name) return '<tr class="vacia"><td class="rank">' + pos + '</td><td>—</td><td class="num"></td></tr>';
-          return '<tr><td class="rank">' + pos + '</td>' +
-            '<td class="player">' + escapeHtml(r.name) + (r.isVip ? '<span class="vip">VIP</span>' : '') + '</td>' +
-            '<td class="num">' + escapeHtml(r.value || '') + '</td></tr>';
-        }).join('') + '</tbody></table>';
-    return '<section class="board"' + (c ? ' style="--c:' + c + '"' : '') + '>' + head + body + '</section>';
-  }).join('');
+  const c = safeColor(s.color);
+  const rows = s.rows || [];
+  const filled = filledOf(s);
+  const head = '<div class="board-h"><h2>' + escapeHtml(s.title) + '</h2>' +
+    (filled ? '<small>Top ' + filled + '</small>' : '') + '</div>';
+  const body = !filled
+    ? '<div class="empty">Aún no hay récords.</div>'
+    : '<table><thead><tr><th>#</th><th>Jugador</th><th class="num">' + escapeHtml(s.title) + '</th></tr></thead><tbody>' +
+      rows.map((r, i) => {
+        const pos = '<span class="pos' + (i < 3 ? ' p' + (i + 1) : '') + '">' + (i + 1) + '</span>';
+        if (!r || !r.name) return '<tr class="vacia"><td class="rank">' + pos + '</td><td>—</td><td class="num"></td></tr>';
+        return '<tr><td class="rank">' + pos + '</td>' +
+          '<td class="player">' + escapeHtml(r.name) + (r.isVip ? '<span class="vip">VIP</span>' : '') + '</td>' +
+          '<td class="num">' + escapeHtml(r.value || '') + '</td></tr>';
+      }).join('') + '</tbody></table>';
+  $('boards').innerHTML = '<section class="board"' + (c ? ' style="--c:' + c + '"' : '') + '>' + head + body + '</section>';
 }
 
 function flash(el, html, back) {
