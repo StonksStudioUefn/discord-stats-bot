@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-app="leaderboards">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Los leaderboards de los mapas de STONKS">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#161618">
-<title>LEADERBOARDS STONKS</title>
+<title>LEADERBOARDS</title>
 <!-- El paquete de diseño de STONKS (el mismo que KANBAN, ALMACÉN y FINANZAS)
      y el armazón del kanban: barra lateral con carpetas y panel redondeado. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,6 +15,13 @@
 <link rel="stylesheet" href="diseno/tokens.css">
 <script src="diseno/chispa.js"></script>
 <style>
+/* El acento propio de LEADERBOARDS, como el naranja del kanban, el azul del
+   almacén y el verde de finanzas: violeta con la misma viveza (HSL 86 %) y
+   el mismo contraste (5,9:1 sobre --bg, 8,1:1 el de texto, 6,5:1 la tinta
+   encima). Va aquí y no en diseno/tokens.css, que es copia del paquete. */
+[data-app="leaderboards"]{
+  --accent:#B974F5; --accent-t:#CE95FF; --accent-ink:#0E0814; --accent-soft:rgba(185,116,245,.15);
+}
 :root{
   --fr:14px; --side-w:264px; --maxw:1120px;
   --gl:max(16px,env(safe-area-inset-left,0px)); --gr:max(16px,env(safe-area-inset-right,0px));
@@ -124,31 +131,22 @@ button.chip.done{color:var(--k-green); border-color:var(--t-green)}
 .pulse.on::after{content:""; position:absolute; inset:-3px; border-radius:50%; border:2px solid var(--t-green); opacity:0; animation:pulso 2s var(--ease-out) infinite}
 @keyframes pulso{0%{transform:scale(.6); opacity:.7} 100%{transform:scale(1.6); opacity:0}}
 
-/* Una ficha por estadística, como las cifras de General: el color en el punto
-   y no en la ficha. Pulsarla enseña su top. */
-.gen-stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px}
-.gen-stat{--gt:var(--t-slate); position:relative; display:flex; flex-direction:column; gap:4px; padding:42px 20px 16px; border-radius:var(--r-l); color:var(--muted); text-align:left;
-  background:var(--surface); border:1px solid transparent; min-width:0; transition:border-color .16s var(--ease), transform .3s var(--spring)}
-.gen-stat::before{content:''; position:absolute; top:18px; left:20px; width:10px; height:10px; border-radius:99px; background:var(--gt); box-shadow:0 0 0 4px color-mix(in srgb,var(--gt) 22%,transparent)}
-@media (hover:hover){.gen-stat:hover{border-color:color-mix(in srgb,var(--gt) 60%,transparent)}}
-.gen-stat:active{transform:scale(.985)}
-.gen-stat[aria-selected="true"]{border-color:var(--gt); background:color-mix(in srgb,var(--gt) 7%,var(--surface))}
-.gen-n{font-family:var(--display); font-weight:700; font-size:34px; line-height:1.05; color:var(--text); font-variant-numeric:tabular-nums; letter-spacing:-.03em; overflow-wrap:anywhere}
-.gen-l{font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.gen-l strong{color:var(--text); font-weight:600}
-.gen-h{margin:32px 2px 12px; font-family:var(--display); font-size:21px; font-weight:700; letter-spacing:-.015em; color:var(--text); display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
-.gen-h small{font-family:var(--sans); font-size:12.5px; font-weight:400; color:var(--faint); letter-spacing:0}
-
-/* El top */
-.board{background:var(--surface); border-radius:var(--r-l); overflow:hidden}
+/* Todos los leaderboards del mapa a la vista, uno por estadística. */
+.boards{display:grid; gap:16px; margin-top:6px}
+@media (min-width:1100px){.boards{grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start}}
+.board{--c:var(--t-slate); background:var(--surface); border-radius:var(--r-l); overflow:hidden; min-width:0}
+.board-h{display:flex; align-items:center; gap:10px; padding:16px 20px 12px}
+.board-h::before{content:''; width:10px; height:10px; border-radius:99px; flex:none; background:var(--c); box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 22%,transparent)}
+.board-h h2{margin:0; flex:1; min-width:0; font-family:var(--display); font-size:17px; font-weight:700; letter-spacing:-.01em}
+.board-h small{font-size:12.5px; color:var(--faint); font-variant-numeric:tabular-nums}
 table{width:100%; border-collapse:collapse}
-thead th{color:var(--faint); font-size:12px; font-weight:500; text-align:left; padding:12px 20px 10px; border-bottom:1px solid var(--line-soft)}
+thead th{color:var(--faint); font-size:12px; font-weight:500; text-align:left; padding:6px 20px 10px; border-bottom:1px solid var(--line-soft)}
 thead th.num{text-align:right}
 tbody td{padding:11px 20px; border-bottom:1px solid var(--line-soft); font-size:14px; color:var(--text); vertical-align:middle}
 tbody tr:last-child td{border-bottom:none}
 @media (hover:hover){tbody tr:hover{background:rgba(255,255,255,.025)}}
 td.rank{width:60px}
-td.num{text-align:right; font-variant-numeric:tabular-nums; font-weight:700; color:var(--c,var(--text)); white-space:nowrap}
+td.num{text-align:right; font-variant-numeric:tabular-nums; font-weight:700; color:var(--c); white-space:nowrap}
 td.player{overflow-wrap:anywhere}
 .vip{display:inline-flex; margin-left:7px; padding:1px 8px; border-radius:99px; font-size:11px; font-weight:650; letter-spacing:.04em; background:var(--s-amber); color:var(--k-amber); vertical-align:1px}
 .pos{display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%; font-size:12px; font-weight:700; color:var(--faint); font-variant-numeric:tabular-nums}
@@ -156,7 +154,7 @@ td.player{overflow-wrap:anywhere}
 .pos.p2{background:rgba(200,205,215,.14); color:#D4D8E0}
 .pos.p3{background:rgba(214,140,90,.16); color:#E7A47A}
 tr.vacia td{color:var(--faint)}
-.empty{padding:40px 20px; text-align:center; color:var(--faint); font-size:14px}
+.empty{padding:28px 20px 34px; text-align:center; color:var(--faint); font-size:14px; border-top:1px solid var(--line-soft)}
 
 .boot{position:fixed; inset:0; z-index:400; display:grid; place-items:center; background:var(--bg); color:var(--muted); font-size:14px}
 .boot-in{display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center; padding:0 24px}
@@ -191,10 +189,7 @@ tr.vacia td{color:var(--faint)}
   @media (hover:hover){body.shell .hdr .icon-btn:hover{background:var(--surface-2); box-shadow:inset 0 0 0 1px var(--line)}}
 }
 @media (max-width:520px){
-  .gen-stats{grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px}
-  .gen-stat{padding:34px 12px 12px} .gen-stat::before{top:14px; left:12px}
-  .gen-n{font-size:22px} .gen-l{font-size:12px} .gen-h{font-size:17px; margin-top:26px}
-  tbody td,thead th{padding-left:12px; padding-right:12px} td.rank{width:46px}
+  tbody td,thead th,.board-h{padding-left:12px; padding-right:12px} td.rank{width:46px}
 }
 @media (prefers-reduced-motion:reduce){
   *{transition:none!important}
@@ -206,7 +201,7 @@ tr.vacia td{color:var(--faint)}
 <nav class="side" id="side" aria-label="Mapas">
   <div class="side-brand" id="brand">
     <a class="side-logo" href="https://stonksstudio.com" aria-label="Ir a la web de STONKS (stonksstudio.com)"><span class="logo" id="logo"></span></a>
-    <span>STONKS LEADERBOARDS</span>
+    <span>LEADERBOARDS</span>
   </div>
   <div class="side-mid" id="sideMid"></div>
   <div class="side-foot" id="sideFoot" hidden></div>
@@ -228,9 +223,7 @@ tr.vacia td{color:var(--faint)}
   </header>
   <main class="page">
     <p class="gen-date" id="meta"></p>
-    <div class="gen-stats" id="stats" role="tablist" aria-label="Estadísticas"></div>
-    <h2 class="gen-h" id="boardTitle"></h2>
-    <section class="board" id="board"></section>
+    <div class="boards" id="boards"></div>
   </main>
 </div>
 
@@ -238,7 +231,7 @@ tr.vacia td{color:var(--faint)}
 
 <script>
 const $ = id => document.getElementById(id);
-const state = { data: null, game: 0, stat: 0, live: {} };
+const state = { data: null, game: 0, live: {} };
 const SVG = {
   chev: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>',
   copy: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
@@ -352,7 +345,7 @@ function renderSide() {
   mid.querySelectorAll('.side-it').forEach(a => a.onclick = e => {
     e.preventDefault();
     sideOpen(false);
-    select(+a.dataset.i, 0);
+    select(+a.dataset.i);
   });
   renderLive();
 }
@@ -362,27 +355,15 @@ function sideOpen(open) {
   $('menuBtn').setAttribute('aria-expanded', String(open));
 }
 
-/* ── Selección en la URL (#juego/stat) para poder enlazar y recargar ── */
+/* ── El mapa elegido va en la URL (#juego) para poder enlazar y recargar ── */
 function readHash() {
-  const [gk, sk] = decodeURIComponent(location.hash.slice(1)).split('/');
+  const gk = decodeURIComponent(location.hash.slice(1)).split('/')[0];
   const gi = state.data.games.findIndex(g => g.key === gk);
-  if (gi < 0) {
-    state.game = creatorGroups()[0].games[0];
-    state.stat = 0;
-    return;
-  }
-  state.game = gi;
-  const si = state.data.games[gi].stats.findIndex(s => s.key === sk);
-  state.stat = si < 0 ? 0 : si;
+  state.game = gi < 0 ? creatorGroups()[0].games[0] : gi;
 }
-function writeHash() {
-  const g = state.data.games[state.game], s = g.stats[state.stat];
-  history.replaceState(null, '', '#' + g.key + (s ? '/' + s.key : ''));
-}
-function select(game, stat) {
+function select(game) {
   state.game = game;
-  state.stat = stat;
-  writeHash();
+  history.replaceState(null, '', '#' + state.data.games[game].key);
   render();
   $('app').scrollTo({ top: 0 });
 }
@@ -390,8 +371,7 @@ function select(game, stat) {
 function render() {
   renderSide();
   renderHeader();
-  renderStats();
-  renderBoard();
+  renderBoards();
 }
 
 function renderHeader() {
@@ -400,7 +380,7 @@ function renderHeader() {
   const code = islandCode(g);
   $('hdrThumb').innerHTML = thumbHtml(g);
   $('title').textContent = isl.name || g.name;
-  document.title = (isl.name || g.name) + ' · LEADERBOARDS STONKS';
+  document.title = (isl.name || g.name) + ' · LEADERBOARDS';
   const link = $('ggLink');
   link.hidden = !code;
   if (code) link.href = islandUrl(code);
@@ -417,50 +397,31 @@ function renderHeader() {
   renderLive();
 }
 
-function renderStats() {
+function renderBoards() {
   const g = state.data.games[state.game];
-  const cont = $('stats');
-  cont.innerHTML = (g.stats || []).map((s, i) => {
+  const stats = g.stats || [];
+  if (!stats.length) {
+    $('boards').innerHTML = '<section class="board"><div class="empty">Este mapa no tiene estadísticas.</div></section>';
+    return;
+  }
+  $('boards').innerHTML = stats.map(s => {
     const c = safeColor(s.color);
-    const top = (s.rows || []).find(r => r && r.name);
-    return '<button type="button" class="gen-stat" role="tab" data-i="' + i + '" aria-selected="' + (i === state.stat) + '"' +
-      (c ? ' style="--gt:' + c + '"' : '') + '>' +
-      '<span class="gen-n">' + escapeHtml(top ? top.value : '—') + '</span>' +
-      '<span class="gen-l">' + escapeHtml(s.title) + (top ? ' · <strong>' + escapeHtml(top.name) + '</strong>' : ' · sin récords') + '</span>' +
-    '</button>';
+    const rows = s.rows || [];
+    const filled = rows.filter(r => r && r.name).length;
+    const head = '<div class="board-h"><h2>' + escapeHtml(s.title) + '</h2>' +
+      (filled ? '<small>Top ' + filled + '</small>' : '') + '</div>';
+    const body = !filled
+      ? '<div class="empty">Aún no hay récords.</div>'
+      : '<table><thead><tr><th>#</th><th>Jugador</th><th class="num">' + escapeHtml(s.title) + '</th></tr></thead><tbody>' +
+        rows.map((r, i) => {
+          const pos = '<span class="pos' + (i < 3 ? ' p' + (i + 1) : '') + '">' + (i + 1) + '</span>';
+          if (!r || !r.name) return '<tr class="vacia"><td class="rank">' + pos + '</td><td>—</td><td class="num"></td></tr>';
+          return '<tr><td class="rank">' + pos + '</td>' +
+            '<td class="player">' + escapeHtml(r.name) + (r.isVip ? '<span class="vip">VIP</span>' : '') + '</td>' +
+            '<td class="num">' + escapeHtml(r.value || '') + '</td></tr>';
+        }).join('') + '</tbody></table>';
+    return '<section class="board"' + (c ? ' style="--c:' + c + '"' : '') + '>' + head + body + '</section>';
   }).join('');
-  cont.querySelectorAll('.gen-stat').forEach(b => b.onclick = () => select(state.game, +b.dataset.i));
-}
-
-function renderBoard() {
-  const g = state.data.games[state.game];
-  const s = (g.stats || [])[state.stat];
-  const board = $('board');
-  if (!s) {
-    $('boardTitle').textContent = '';
-    board.innerHTML = '<div class="empty">Este mapa no tiene estadísticas.</div>';
-    return;
-  }
-  const c = safeColor(s.color);
-  if (c) board.style.setProperty('--c', c); else board.style.removeProperty('--c');
-  const rows = s.rows || [];
-  const filled = rows.filter(r => r && r.name).length;
-  const d = parseUpdated(s.updated);
-  $('boardTitle').innerHTML = escapeHtml(filled ? 'Top ' + filled : 'Top') +
-    '<small' + (d ? ' title="' + escapeHtml(localDate(d)) + '"' : '') + '>' + escapeHtml(s.title) + ' · actualizado ' + escapeHtml(relTime(d)) + '</small>';
-
-  if (!filled) {
-    board.innerHTML = '<div class="empty">Aún no hay récords en esta estadística.</div>';
-    return;
-  }
-  board.innerHTML = '<table><thead><tr><th>#</th><th>Jugador</th><th class="num">' + escapeHtml(s.title) + '</th></tr></thead><tbody>' +
-    rows.map((r, i) => {
-      const pos = '<span class="pos' + (i < 3 ? ' p' + (i + 1) : '') + '">' + (i + 1) + '</span>';
-      if (!r || !r.name) return '<tr class="vacia"><td class="rank">' + pos + '</td><td>—</td><td class="num"></td></tr>';
-      return '<tr><td class="rank">' + pos + '</td>' +
-        '<td class="player">' + escapeHtml(r.name) + (r.isVip ? '<span class="vip">VIP</span>' : '') + '</td>' +
-        '<td class="num">' + escapeHtml(r.value || '') + '</td></tr>';
-    }).join('') + '</tbody></table>';
 }
 
 function flash(el, html, back) {
