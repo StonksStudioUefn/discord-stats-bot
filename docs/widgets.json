@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-16 20:46 UTC",
+  "updated": "2026-10-16 23:22 UTC",
   "games": [
     {
       "key": "laser_for_brainrots",
@@ -73,7 +73,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-16 20:46 UTC"
+          "updated": "2026-10-16 23:22 UTC"
         },
         {
           "key": "cash",
@@ -132,7 +132,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-16 20:46 UTC"
+          "updated": "2026-10-16 23:22 UTC"
         }
       ]
     },
@@ -157,7 +157,7 @@
           "emoji": "💰",
           "color": "#ffde20",
           "rows": [],
-          "updated": "2026-10-16 20:46 UTC"
+          "updated": "2026-10-16 23:22 UTC"
         },
         {
           "key": "cash",
@@ -165,7 +165,7 @@
           "emoji": "💵",
           "color": "#00e10c",
           "rows": [],
-          "updated": "2026-10-16 20:46 UTC"
+          "updated": "2026-10-16 23:22 UTC"
         }
       ]
     },
@@ -206,7 +206,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-16 20:46 UTC"
+          "updated": "2026-10-16 23:22 UTC"
         },
         {
           "key": "cash",
@@ -230,7 +230,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-16 20:46 UTC"
+          "updated": "2026-10-16 23:22 UTC"
         }
       ]
     },
@@ -306,7 +306,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-16 20:46 UTC"
+          "updated": "2026-10-16 23:22 UTC"
         },
         {
           "key": "hay",
@@ -335,6 +335,11 @@
               "isVip": false
             },
             {
+              "name": "Nomate_CORGOAT",
+              "value": "360.8K",
+              "isVip": false
+            },
+            {
               "name": "AAOxSWEETx",
               "value": "315.7K",
               "isVip": false
@@ -358,14 +363,9 @@
               "name": "MissKiwi2002",
               "value": "228.5K",
               "isVip": false
-            },
-            {
-              "name": "M8 Rankxerox",
-              "value": "199.2K",
-              "isVip": false
             }
           ],
-          "updated": "2026-10-16 20:46 UTC"
+          "updated": "2026-10-16 23:22 UTC"
         },
         {
           "key": "best_time",
@@ -376,6 +376,11 @@
             {
               "name": "MissKiwi2002",
               "value": "0:25",
+              "isVip": false
+            },
+            {
+              "name": "Nomate_CORGOAT",
+              "value": "0:46",
               "isVip": false
             },
             {
@@ -417,14 +422,9 @@
               "name": "BugattiGuy2010",
               "value": "1:28",
               "isVip": false
-            },
-            {
-              "name": "lordgalica",
-              "value": "1:28",
-              "isVip": false
             }
           ],
-          "updated": "2026-10-16 20:46 UTC"
+          "updated": "2026-10-16 23:22 UTC"
         }
       ]
     },
@@ -448,8 +448,14 @@
           "title": "MOST WINS",
           "emoji": "🏆",
           "color": "#ffde20",
-          "rows": [],
-          "updated": "2026-10-16 20:46 UTC"
+          "rows": [
+            {
+              "name": "lemon-napkin",
+              "value": "39",
+              "isVip": false
+            }
+          ],
+          "updated": "2026-10-16 23:22 UTC"
         },
         {
           "key": "paintings",
@@ -458,28 +464,45 @@
           "color": "#0099ff",
           "rows": [
             {
+              "name": "lemon-napkin",
+              "value": "41",
+              "isVip": false
+            },
+            {
               "name": "الحسنツ",
               "value": "4",
               "isVip": false
             }
           ],
-          "updated": "2026-10-16 20:46 UTC"
+          "updated": "2026-10-16 23:22 UTC"
         },
         {
           "key": "keys",
           "title": "MOST KEYS",
           "emoji": "🔑",
           "color": "#ff4059",
-          "rows": [],
-          "updated": "2026-10-16 20:46 UTC"
+          "rows": [
+            {
+              "name": "lemon-napkin",
+              "value": "1.06M",
+              "isVip": false
+            }
+          ],
+          "updated": "2026-10-16 23:22 UTC"
         },
         {
           "key": "best_time",
           "title": "BEST TIME",
           "emoji": "⏱️",
           "color": "#78f000",
-          "rows": [],
-          "updated": "2026-10-16 20:46 UTC"
+          "rows": [
+            {
+              "name": "lemon-napkin",
+              "value": "6:29",
+              "isVip": false
+            }
+          ],
+          "updated": "2026-10-16 23:22 UTC"
         }
       ]
     }
