@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-15 22:02 UTC",
+  "updated": "2026-10-16 01:04 UTC",
   "games": [
     {
       "key": "laser_for_brainrots",
@@ -73,7 +73,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-15 22:02 UTC"
+          "updated": "2026-10-16 01:04 UTC"
         },
         {
           "key": "cash",
@@ -132,7 +132,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-15 22:02 UTC"
+          "updated": "2026-10-16 01:04 UTC"
         }
       ]
     },
@@ -157,7 +157,7 @@
           "emoji": "💰",
           "color": "#ffde20",
           "rows": [],
-          "updated": "2026-10-15 22:02 UTC"
+          "updated": "2026-10-16 01:04 UTC"
         },
         {
           "key": "cash",
@@ -165,7 +165,7 @@
           "emoji": "💵",
           "color": "#00e10c",
           "rows": [],
-          "updated": "2026-10-15 22:02 UTC"
+          "updated": "2026-10-16 01:04 UTC"
         }
       ]
     },
@@ -206,7 +206,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-15 22:02 UTC"
+          "updated": "2026-10-16 01:04 UTC"
         },
         {
           "key": "cash",
@@ -230,7 +230,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-15 22:02 UTC"
+          "updated": "2026-10-16 01:04 UTC"
         }
       ]
     },
@@ -306,7 +306,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-15 22:02 UTC"
+          "updated": "2026-10-16 01:04 UTC"
         },
         {
           "key": "hay",
@@ -350,6 +350,11 @@
               "isVip": false
             },
             {
+              "name": "AlmondSine60812",
+              "value": "183.6K",
+              "isVip": false
+            },
+            {
               "name": "NonExistent420",
               "value": "176.9K",
               "isVip": false
@@ -358,14 +363,9 @@
               "name": "jkchambers2005",
               "value": "171.5K",
               "isVip": false
-            },
-            {
-              "name": "Bad Jedi Juice",
-              "value": "129.4K",
-              "isVip": false
             }
           ],
-          "updated": "2026-10-15 22:02 UTC"
+          "updated": "2026-10-16 01:04 UTC"
         },
         {
           "key": "best_time",
@@ -404,6 +404,11 @@
               "isVip": false
             },
             {
+              "name": "AlmondSine60812",
+              "value": "1:58",
+              "isVip": false
+            },
+            {
               "name": "MumWIthaGun955",
               "value": "2:04",
               "isVip": false
@@ -417,14 +422,9 @@
               "name": "radagast220",
               "value": "2:18",
               "isVip": false
-            },
-            {
-              "name": "Psycho ninja547",
-              "value": "2:23",
-              "isVip": false
             }
           ],
-          "updated": "2026-10-15 22:02 UTC"
+          "updated": "2026-10-16 01:04 UTC"
         }
       ]
     },
@@ -449,7 +449,7 @@
           "emoji": "🏆",
           "color": "#ffde20",
           "rows": [],
-          "updated": "2026-10-15 22:02 UTC"
+          "updated": "2026-10-16 01:04 UTC"
         },
         {
           "key": "paintings",
@@ -463,7 +463,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-15 22:02 UTC"
+          "updated": "2026-10-16 01:04 UTC"
         },
         {
           "key": "keys",
@@ -471,7 +471,7 @@
           "emoji": "🔑",
           "color": "#ff4059",
           "rows": [],
-          "updated": "2026-10-15 22:02 UTC"
+          "updated": "2026-10-16 01:04 UTC"
         },
         {
           "key": "best_time",
@@ -479,7 +479,7 @@
           "emoji": "⏱️",
           "color": "#78f000",
           "rows": [],
-          "updated": "2026-10-15 22:02 UTC"
+          "updated": "2026-10-16 01:04 UTC"
         }
       ]
     }
