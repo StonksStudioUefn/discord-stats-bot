@@ -172,7 +172,8 @@ async def _procesar_mensaje(message: discord.Message) -> str | None:
     # vale aunque la imagen esté tapada o Gemini la lea mal.
     manual = DATOS_MANUALES.get(str(message.id))
     if manual is not None:
-        stats = manual
+        # Sin player=..., el nombre de Discord (el de la BD manda si ya existe).
+        stats = {"player_name": message.author.display_name, **manual}
         print(f"[INFO] msg {message.id}: datos a mano, sin Gemini -> {stats}")
     else:
         attachment = message.attachments[0]
@@ -336,6 +337,7 @@ def _datos_manuales() -> list[tuple[str, str, dict]]:
         ID_o_enlace=clave_juego | player=Nombre | vip=1 | wins=97 | hay=840 K
     Las stats van con su clave de games.py y el mismo texto que leería
     Gemini ('840 K', '14:20'...); las que no se pongan no se tocan.
+    player y vip son opcionales: sin player, el nombre de Discord; sin vip, no VIP.
     Devuelve [(message_id, game_key, stats), ...].
     """
     crudo = os.environ.get("MANUAL", "")
@@ -372,9 +374,6 @@ def _datos_manuales() -> list[tuple[str, str, dict]]:
                     f"[WARN] manual {mid}: campo '{clave}' desconocido para "
                     f"'{juego}' (válidos: player, vip, {sorted(campos_validos)})."
                 )
-        if not stats.get("player_name"):
-            print(f"[WARN] manual {mid}: falta player=...; lo ignoro.")
-            continue
         salida.append((mid, juego, stats))
     return salida
 
