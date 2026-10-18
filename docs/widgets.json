@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-18 00:46 UTC",
+  "updated": "2026-10-18 03:21 UTC",
   "games": [
     {
       "key": "laser_for_brainrots",
@@ -73,7 +73,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-18 00:46 UTC"
+          "updated": "2026-10-18 03:21 UTC"
         },
         {
           "key": "cash",
@@ -132,7 +132,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-18 00:46 UTC"
+          "updated": "2026-10-18 03:21 UTC"
         }
       ]
     },
@@ -157,7 +157,7 @@
           "emoji": "💰",
           "color": "#ffde20",
           "rows": [],
-          "updated": "2026-10-18 00:46 UTC"
+          "updated": "2026-10-18 03:21 UTC"
         },
         {
           "key": "cash",
@@ -165,7 +165,7 @@
           "emoji": "💵",
           "color": "#00e10c",
           "rows": [],
-          "updated": "2026-10-18 00:46 UTC"
+          "updated": "2026-10-18 03:21 UTC"
         }
       ]
     },
@@ -206,7 +206,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-18 00:46 UTC"
+          "updated": "2026-10-18 03:21 UTC"
         },
         {
           "key": "cash",
@@ -230,7 +230,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-18 00:46 UTC"
+          "updated": "2026-10-18 03:21 UTC"
         }
       ]
     },
@@ -256,13 +256,13 @@
           "color": "#ffde20",
           "rows": [
             {
-              "name": "RuGRatsz_94",
-              "value": "97",
+              "name": "MR x TEXAS",
+              "value": "150",
               "isVip": false
             },
             {
-              "name": "MR x TEXAS",
-              "value": "61",
+              "name": "RuGRatsz_94",
+              "value": "97",
               "isVip": false
             },
             {
@@ -306,7 +306,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-18 00:46 UTC"
+          "updated": "2026-10-18 03:21 UTC"
         },
         {
           "key": "hay",
@@ -314,6 +314,11 @@
           "emoji": "🌾",
           "color": "#ff8c00",
           "rows": [
+            {
+              "name": "MR x TEXAS",
+              "value": "1M",
+              "isVip": false
+            },
             {
               "name": "RuGRatsz_94",
               "value": "840.3K",
@@ -332,11 +337,6 @@
             {
               "name": "ImASweat2707",
               "value": "451.1K",
-              "isVip": false
-            },
-            {
-              "name": "MR x TEXAS",
-              "value": "425.2K",
               "isVip": false
             },
             {
@@ -365,7 +365,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-18 00:46 UTC"
+          "updated": "2026-10-18 03:21 UTC"
         },
         {
           "key": "best_time",
@@ -374,13 +374,13 @@
           "color": "#0099ff",
           "rows": [
             {
-              "name": "MissKiwi2002",
-              "value": "0:25",
+              "name": "MR x TEXAS",
+              "value": "0:19",
               "isVip": false
             },
             {
-              "name": "MR x TEXAS",
-              "value": "0:26",
+              "name": "MissKiwi2002",
+              "value": "0:25",
               "isVip": false
             },
             {
@@ -424,7 +424,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-18 00:46 UTC"
+          "updated": "2026-10-18 03:21 UTC"
         }
       ]
     },
@@ -455,7 +455,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-18 00:46 UTC"
+          "updated": "2026-10-18 03:21 UTC"
         },
         {
           "key": "paintings",
@@ -474,7 +474,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-18 00:46 UTC"
+          "updated": "2026-10-18 03:21 UTC"
         },
         {
           "key": "keys",
@@ -488,7 +488,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-18 00:46 UTC"
+          "updated": "2026-10-18 03:21 UTC"
         },
         {
           "key": "best_time",
@@ -502,7 +502,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-18 00:46 UTC"
+          "updated": "2026-10-18 03:21 UTC"
         }
       ]
     }
