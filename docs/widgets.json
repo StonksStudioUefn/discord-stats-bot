@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-17 22:05 UTC",
+  "updated": "2026-10-18 00:46 UTC",
   "games": [
     {
       "key": "laser_for_brainrots",
@@ -73,7 +73,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-17 22:05 UTC"
+          "updated": "2026-10-18 00:46 UTC"
         },
         {
           "key": "cash",
@@ -132,7 +132,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-17 22:05 UTC"
+          "updated": "2026-10-18 00:46 UTC"
         }
       ]
     },
@@ -157,7 +157,7 @@
           "emoji": "💰",
           "color": "#ffde20",
           "rows": [],
-          "updated": "2026-10-17 22:05 UTC"
+          "updated": "2026-10-18 00:46 UTC"
         },
         {
           "key": "cash",
@@ -165,7 +165,7 @@
           "emoji": "💵",
           "color": "#00e10c",
           "rows": [],
-          "updated": "2026-10-17 22:05 UTC"
+          "updated": "2026-10-18 00:46 UTC"
         }
       ]
     },
@@ -206,7 +206,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-17 22:05 UTC"
+          "updated": "2026-10-18 00:46 UTC"
         },
         {
           "key": "cash",
@@ -230,7 +230,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-17 22:05 UTC"
+          "updated": "2026-10-18 00:46 UTC"
         }
       ]
     },
@@ -291,6 +291,11 @@
               "isVip": false
             },
             {
+              "name": "Memfox14",
+              "value": "32",
+              "isVip": false
+            },
+            {
               "name": "TinyJesus03",
               "value": "29",
               "isVip": false
@@ -299,14 +304,9 @@
               "name": "worthy_baths0",
               "value": "27",
               "isVip": false
-            },
-            {
-              "name": "MissKiwi2002",
-              "value": "26",
-              "isVip": false
             }
           ],
-          "updated": "2026-10-17 22:05 UTC"
+          "updated": "2026-10-18 00:46 UTC"
         },
         {
           "key": "hay",
@@ -340,6 +340,11 @@
               "isVip": false
             },
             {
+              "name": "ArtKor_97",
+              "value": "372.7K",
+              "isVip": false
+            },
+            {
               "name": "Nomate_CORGOAT",
               "value": "360.8K",
               "isVip": false
@@ -358,14 +363,9 @@
               "name": "MumWIthaGun955",
               "value": "300.1K",
               "isVip": false
-            },
-            {
-              "name": "TinyJesus03",
-              "value": "299.4K",
-              "isVip": false
             }
           ],
-          "updated": "2026-10-17 22:05 UTC"
+          "updated": "2026-10-18 00:46 UTC"
         },
         {
           "key": "best_time",
@@ -381,6 +381,11 @@
             {
               "name": "MR x TEXAS",
               "value": "0:26",
+              "isVip": false
+            },
+            {
+              "name": "Memfox14",
+              "value": "0:30",
               "isVip": false
             },
             {
@@ -417,14 +422,9 @@
               "name": "Kexhir",
               "value": "1:07",
               "isVip": false
-            },
-            {
-              "name": "TinyJesus03",
-              "value": "1:09",
-              "isVip": false
             }
           ],
-          "updated": "2026-10-17 22:05 UTC"
+          "updated": "2026-10-18 00:46 UTC"
         }
       ]
     },
@@ -455,7 +455,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-17 22:05 UTC"
+          "updated": "2026-10-18 00:46 UTC"
         },
         {
           "key": "paintings",
@@ -474,7 +474,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-17 22:05 UTC"
+          "updated": "2026-10-18 00:46 UTC"
         },
         {
           "key": "keys",
@@ -488,7 +488,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-17 22:05 UTC"
+          "updated": "2026-10-18 00:46 UTC"
         },
         {
           "key": "best_time",
@@ -502,7 +502,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-17 22:05 UTC"
+          "updated": "2026-10-18 00:46 UTC"
         }
       ]
     }
