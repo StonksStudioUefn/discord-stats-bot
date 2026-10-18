@@ -168,15 +168,24 @@ async def _procesar_mensaje(message: discord.Message) -> str | None:
     Devuelve la clave del juego al que se asignó (para saber qué embeds
     refrescar al final), o None si se rechazó.
     """
-    attachment = message.attachments[0]
-    if not _es_imagen(attachment):
-        return None
+    # Datos puestos a mano (input 'manual'): no se lee la captura, así que
+    # vale aunque la imagen esté tapada o Gemini la lea mal.
+    manual = DATOS_MANUALES.get(str(message.id))
+    if manual is not None:
+        stats = manual
+        print(f"[INFO] msg {message.id}: datos a mano, sin Gemini -> {stats}")
+    else:
+        attachment = message.attachments[0]
+        if not _es_imagen(attachment):
+            return None
+        stats = None
 
     # 1) Gemini lee la captura con el esquema universal.
     try:
-        image_bytes = await attachment.read()
-        stats = await extract_stats_from_image(image_bytes, attachment.content_type)
-        print(f"[DEBUG] msg {message.id}: {stats}")
+        if stats is None:
+            image_bytes = await attachment.read()
+            stats = await extract_stats_from_image(image_bytes, attachment.content_type)
+            print(f"[DEBUG] msg {message.id}: {stats}")
     except GeminiTransientError:
         # Error transitorio (sobrecarga/timeout): NO avisamos al usuario.
         # Se propaga para que el orquestador lo encole y lo reintente en
@@ -311,6 +320,64 @@ async def _procesar_mensaje(message: discord.Message) -> str | None:
 # {message_id: game_key} de las capturas reprocesadas con juego forzado.
 JUEGO_FORZADO: dict[str, str] = {}
 
+# {message_id: stats} de las capturas con los datos puestos a mano
+# (input 'manual'): sustituyen a lo que leería Gemini.
+DATOS_MANUALES: dict[str, dict] = {}
+
+# Mensajes ya procesados por la cola en esta ejecución: la tanda de
+# mensajes nuevos se los salta para no responder dos veces.
+PROCESADOS_EN_COLA: set[str] = set()
+
+
+def _datos_manuales() -> list[tuple[str, str, dict]]:
+    """
+    Capturas con los datos puestos a mano (input 'manual' del workflow ->
+    variable MANUAL). Una por línea o separadas por ';':
+        ID_o_enlace=clave_juego | player=Nombre | vip=1 | wins=97 | hay=840 K
+    Las stats van con su clave de games.py y el mismo texto que leería
+    Gemini ('840 K', '14:20'...); las que no se pongan no se tocan.
+    Devuelve [(message_id, game_key, stats), ...].
+    """
+    crudo = os.environ.get("MANUAL", "")
+    salida = []
+    for linea in crudo.replace(";", "\n").splitlines():
+        if not linea.strip():
+            continue
+        partes = [p.strip() for p in linea.split("|")]
+        ref, _, juego = partes[0].partition("=")
+        mid = ref.strip().rstrip("/").split("/")[-1]
+        juego = juego.strip()
+        if not mid.isdigit() or juego not in GAMES:
+            print(
+                f"[WARN] manual: no entiendo '{partes[0]}' (hace falta "
+                f"ID=juego). Juegos: {sorted(GAMES)}. Lo ignoro."
+            )
+            continue
+        stats: dict = {"stats_detected": True, "name_fully_visible": True}
+        # Se acepta la clave de la stat ('wins') o su campo de Gemini ('card_wins').
+        campos_validos = {}
+        for k, info in GAMES[juego]["stats"].items():
+            campos_validos[k] = campos_validos[stat_field(k, info)] = stat_field(k, info)
+        for parte in partes[1:]:
+            clave, _, valor = parte.partition("=")
+            clave, valor = clave.strip().lower(), valor.strip()
+            if clave == "player":
+                stats["player_name"] = valor
+            elif clave == "vip":
+                stats["is_vip"] = valor.lower() in ("1", "true", "yes", "si", "sí")
+            elif clave in campos_validos:
+                stats[campos_validos[clave]] = valor
+            else:
+                print(
+                    f"[WARN] manual {mid}: campo '{clave}' desconocido para "
+                    f"'{juego}' (válidos: player, vip, {sorted(campos_validos)})."
+                )
+        if not stats.get("player_name"):
+            print(f"[WARN] manual {mid}: falta player=...; lo ignoro.")
+            continue
+        salida.append((mid, juego, stats))
+    return salida
+
 
 def _ids_a_reprocesar() -> list[tuple[str, str | None]]:
     """
@@ -405,6 +472,7 @@ async def _procesar_cola_pendientes(
 
         # Se procesó (bien o rechazada por otro motivo): sale de la cola.
         await quitar_pendiente(message_id)
+        PROCESADOS_EN_COLA.add(str(message_id))
         if game_key:
             juegos_tocados.add(game_key)
             print(f"[QUEUE] msg {message_id} procesada con éxito en reintento.")
@@ -550,6 +618,11 @@ async def on_ready():
                 + (f" (juego forzado: {juego})." if juego else ".")
             )
             await añadir_pendiente(mid, intentos=1)
+        for mid, juego, stats in _datos_manuales():
+            JUEGO_FORZADO[mid] = juego
+            DATOS_MANUALES[mid] = stats
+            print(f"[QUEUE] msg {mid} añadida a mano con sus datos (juego: {juego}).")
+            await añadir_pendiente(mid, intentos=1)
         await _procesar_cola_pendientes(c_submit, juegos_tocados)
 
         # --- Procesar cada captura NUEVA y trackear qué juegos refrescar ---
@@ -558,6 +631,8 @@ async def on_ready():
                 if message.author == client.user:
                     continue
                 if not message.attachments:
+                    continue
+                if str(message.id) in PROCESADOS_EN_COLA:
                     continue
                 try:
                     game_key = await _procesar_mensaje(message)

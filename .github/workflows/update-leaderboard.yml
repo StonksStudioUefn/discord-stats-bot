@@ -8,6 +8,10 @@ on:
         description: "IDs o enlaces de mensajes de Discord a reprocesar (separados por comas o espacios). Para forzar el juego si falta el código de isla: ID=clave_juego (ej. 123=color_the_meme). Opcional."
         required: false
         default: ""
+      manual:
+        description: "Responder con datos puestos a mano, SIN leer la captura. ID_o_enlace=juego | player=Nombre | vip=0 | stat=valor ... (varias: separadas por ';'). Ej.: 123=find_the_needle | player=Pepe | wins=97 | hay=840 K | best_time=14:20. Opcional."
+        required: false
+        default: ""
       silencioso:
         description: "No publicar en Discord ningún mensaje de error/rechazo (solo en el log)."
         type: boolean
@@ -64,6 +68,8 @@ jobs:
           GITHUB_EVENT_NAME: ${{ github.event_name }}
           # Mensajes a reprocesar a mano (solo en ejecución manual).
           REPROCESAR: ${{ inputs.reprocesar }}
+          # Capturas con los datos puestos a mano (solo en ejecución manual).
+          MANUAL: ${{ inputs.manual }}
           # true = no publicar mensajes de error/rechazo en Discord.
           SILENCIOSO: ${{ inputs.silencioso }}
         run: python batch_update.py
