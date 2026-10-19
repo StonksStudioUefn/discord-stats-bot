@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-19 14:29 UTC",
+  "updated": "2026-10-19 20:28 UTC",
   "games": [
     {
       "key": "laser_for_brainrots",
@@ -73,7 +73,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 14:29 UTC"
+          "updated": "2026-10-19 20:28 UTC"
         },
         {
           "key": "cash",
@@ -132,7 +132,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 14:29 UTC"
+          "updated": "2026-10-19 20:28 UTC"
         }
       ]
     },
@@ -157,7 +157,7 @@
           "emoji": "💰",
           "color": "#ffde20",
           "rows": [],
-          "updated": "2026-10-19 14:29 UTC"
+          "updated": "2026-10-19 20:28 UTC"
         },
         {
           "key": "cash",
@@ -165,7 +165,7 @@
           "emoji": "💵",
           "color": "#00e10c",
           "rows": [],
-          "updated": "2026-10-19 14:29 UTC"
+          "updated": "2026-10-19 20:28 UTC"
         }
       ]
     },
@@ -206,7 +206,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 14:29 UTC"
+          "updated": "2026-10-19 20:28 UTC"
         },
         {
           "key": "cash",
@@ -230,7 +230,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 14:29 UTC"
+          "updated": "2026-10-19 20:28 UTC"
         }
       ]
     },
@@ -257,7 +257,7 @@
           "rows": [
             {
               "name": "MR x TEXAS",
-              "value": "420",
+              "value": "500",
               "isVip": false
             },
             {
@@ -281,6 +281,11 @@
               "isVip": false
             },
             {
+              "name": "Elmiz1210",
+              "value": "53",
+              "isVip": false
+            },
+            {
               "name": "NoLife112",
               "value": "51",
               "isVip": false
@@ -291,22 +296,17 @@
               "isVip": false
             },
             {
-              "name": "ELYRÄ",
+              "name": "TinyJesus03",
               "value": "44",
               "isVip": false
             },
             {
-              "name": "NathanielClassic",
-              "value": "37",
-              "isVip": false
-            },
-            {
-              "name": "TurtleSackX",
-              "value": "33",
+              "name": "ELYRÄ",
+              "value": "44",
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 14:29 UTC"
+          "updated": "2026-10-19 20:28 UTC"
         },
         {
           "key": "hay",
@@ -316,7 +316,7 @@
           "rows": [
             {
               "name": "MR x TEXAS",
-              "value": "1.5M",
+              "value": "1.6M",
               "isVip": false
             },
             {
@@ -350,6 +350,11 @@
               "isVip": false
             },
             {
+              "name": "TinyJesus03",
+              "value": "414K",
+              "isVip": false
+            },
+            {
               "name": "NoLife112",
               "value": "386.8K",
               "isVip": false
@@ -358,14 +363,9 @@
               "name": "Nomate_CORGOAT",
               "value": "360.8K",
               "isVip": false
-            },
-            {
-              "name": "MumWIthaGun955",
-              "value": "340.4K",
-              "isVip": false
             }
           ],
-          "updated": "2026-10-19 14:29 UTC"
+          "updated": "2026-10-19 20:28 UTC"
         },
         {
           "key": "best_time",
@@ -394,6 +394,11 @@
               "isVip": false
             },
             {
+              "name": "TinyJesus03",
+              "value": "0:36",
+              "isVip": false
+            },
+            {
               "name": "Nomate_CORGOAT",
               "value": "0:46",
               "isVip": false
@@ -414,17 +419,12 @@
               "isVip": false
             },
             {
-              "name": "TheOnlyOne9054",
-              "value": "0:55",
-              "isVip": false
-            },
-            {
-              "name": "Vust001",
-              "value": "0:59",
+              "name": "ytb-_geno",
+              "value": "0:53",
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 14:29 UTC"
+          "updated": "2026-10-19 20:28 UTC"
         }
       ]
     },
@@ -455,7 +455,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 14:29 UTC"
+          "updated": "2026-10-19 20:28 UTC"
         },
         {
           "key": "paintings",
@@ -474,7 +474,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 14:29 UTC"
+          "updated": "2026-10-19 20:28 UTC"
         },
         {
           "key": "keys",
@@ -488,7 +488,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 14:29 UTC"
+          "updated": "2026-10-19 20:28 UTC"
         },
         {
           "key": "best_time",
@@ -502,7 +502,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 14:29 UTC"
+          "updated": "2026-10-19 20:28 UTC"
         }
       ]
     }
