@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-19 00:58 UTC",
+  "updated": "2026-10-19 06:01 UTC",
   "games": [
     {
       "key": "laser_for_brainrots",
@@ -73,7 +73,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 00:58 UTC"
+          "updated": "2026-10-19 06:01 UTC"
         },
         {
           "key": "cash",
@@ -132,7 +132,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 00:58 UTC"
+          "updated": "2026-10-19 06:01 UTC"
         }
       ]
     },
@@ -157,7 +157,7 @@
           "emoji": "💰",
           "color": "#ffde20",
           "rows": [],
-          "updated": "2026-10-19 00:58 UTC"
+          "updated": "2026-10-19 06:01 UTC"
         },
         {
           "key": "cash",
@@ -165,7 +165,7 @@
           "emoji": "💵",
           "color": "#00e10c",
           "rows": [],
-          "updated": "2026-10-19 00:58 UTC"
+          "updated": "2026-10-19 06:01 UTC"
         }
       ]
     },
@@ -206,7 +206,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 00:58 UTC"
+          "updated": "2026-10-19 06:01 UTC"
         },
         {
           "key": "cash",
@@ -230,7 +230,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 00:58 UTC"
+          "updated": "2026-10-19 06:01 UTC"
         }
       ]
     },
@@ -257,12 +257,17 @@
           "rows": [
             {
               "name": "MR x TEXAS",
-              "value": "200",
+              "value": "350",
               "isVip": false
             },
             {
               "name": "RuGRatsz_94",
               "value": "97",
+              "isVip": false
+            },
+            {
+              "name": "happa",
+              "value": "70",
               "isVip": false
             },
             {
@@ -286,27 +291,22 @@
               "isVip": false
             },
             {
-              "name": "happa",
-              "value": "46",
+              "name": "ELYRÄ",
+              "value": "44",
               "isVip": false
             },
             {
-              "name": "ELYRÄ",
-              "value": "44",
+              "name": "NathanielClassic",
+              "value": "37",
               "isVip": false
             },
             {
               "name": "TurtleSackX",
               "value": "33",
               "isVip": false
-            },
-            {
-              "name": "Memfox14",
-              "value": "32",
-              "isVip": false
             }
           ],
-          "updated": "2026-10-19 00:58 UTC"
+          "updated": "2026-10-19 06:01 UTC"
         },
         {
           "key": "hay",
@@ -316,7 +316,12 @@
           "rows": [
             {
               "name": "MR x TEXAS",
-              "value": "1.1M",
+              "value": "1.4M",
+              "isVip": false
+            },
+            {
+              "name": "happa",
+              "value": "881.9K",
               "isVip": false
             },
             {
@@ -345,11 +350,6 @@
               "isVip": false
             },
             {
-              "name": "happa",
-              "value": "412.8K",
-              "isVip": false
-            },
-            {
               "name": "NoLife112",
               "value": "366.8K",
               "isVip": false
@@ -365,7 +365,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 00:58 UTC"
+          "updated": "2026-10-19 06:01 UTC"
         },
         {
           "key": "best_time",
@@ -404,6 +404,11 @@
               "isVip": false
             },
             {
+              "name": "NathanielClassic",
+              "value": "0:48",
+              "isVip": false
+            },
+            {
               "name": "Bad Jedi Juice",
               "value": "0:49",
               "isVip": false
@@ -417,14 +422,9 @@
               "name": "ELYRÄ",
               "value": "1:01",
               "isVip": false
-            },
-            {
-              "name": "puppygirl emma",
-              "value": "1:02",
-              "isVip": false
             }
           ],
-          "updated": "2026-10-19 00:58 UTC"
+          "updated": "2026-10-19 06:01 UTC"
         }
       ]
     },
@@ -455,7 +455,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 00:58 UTC"
+          "updated": "2026-10-19 06:01 UTC"
         },
         {
           "key": "paintings",
@@ -474,7 +474,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 00:58 UTC"
+          "updated": "2026-10-19 06:01 UTC"
         },
         {
           "key": "keys",
@@ -488,7 +488,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 00:58 UTC"
+          "updated": "2026-10-19 06:01 UTC"
         },
         {
           "key": "best_time",
@@ -502,7 +502,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 00:58 UTC"
+          "updated": "2026-10-19 06:01 UTC"
         }
       ]
     }
