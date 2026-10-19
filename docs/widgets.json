@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-19 06:01 UTC",
+  "updated": "2026-10-19 14:29 UTC",
   "games": [
     {
       "key": "laser_for_brainrots",
@@ -73,7 +73,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 06:01 UTC"
+          "updated": "2026-10-19 14:29 UTC"
         },
         {
           "key": "cash",
@@ -132,7 +132,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 06:01 UTC"
+          "updated": "2026-10-19 14:29 UTC"
         }
       ]
     },
@@ -157,7 +157,7 @@
           "emoji": "💰",
           "color": "#ffde20",
           "rows": [],
-          "updated": "2026-10-19 06:01 UTC"
+          "updated": "2026-10-19 14:29 UTC"
         },
         {
           "key": "cash",
@@ -165,7 +165,7 @@
           "emoji": "💵",
           "color": "#00e10c",
           "rows": [],
-          "updated": "2026-10-19 06:01 UTC"
+          "updated": "2026-10-19 14:29 UTC"
         }
       ]
     },
@@ -206,7 +206,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 06:01 UTC"
+          "updated": "2026-10-19 14:29 UTC"
         },
         {
           "key": "cash",
@@ -230,7 +230,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 06:01 UTC"
+          "updated": "2026-10-19 14:29 UTC"
         }
       ]
     },
@@ -257,7 +257,7 @@
           "rows": [
             {
               "name": "MR x TEXAS",
-              "value": "350",
+              "value": "420",
               "isVip": false
             },
             {
@@ -281,12 +281,12 @@
               "isVip": false
             },
             {
-              "name": "ImASweat2707",
-              "value": "50",
+              "name": "NoLife112",
+              "value": "51",
               "isVip": false
             },
             {
-              "name": "NoLife112",
+              "name": "ImASweat2707",
               "value": "50",
               "isVip": false
             },
@@ -306,7 +306,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 06:01 UTC"
+          "updated": "2026-10-19 14:29 UTC"
         },
         {
           "key": "hay",
@@ -316,7 +316,7 @@
           "rows": [
             {
               "name": "MR x TEXAS",
-              "value": "1.4M",
+              "value": "1.5M",
               "isVip": false
             },
             {
@@ -351,7 +351,7 @@
             },
             {
               "name": "NoLife112",
-              "value": "366.8K",
+              "value": "386.8K",
               "isVip": false
             },
             {
@@ -365,7 +365,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 06:01 UTC"
+          "updated": "2026-10-19 14:29 UTC"
         },
         {
           "key": "best_time",
@@ -374,18 +374,18 @@
           "color": "#0099ff",
           "rows": [
             {
+              "name": "NoLife112",
+              "value": "0:05",
+              "isVip": false
+            },
+            {
               "name": "MR x TEXAS",
-              "value": "0:15",
+              "value": "0:07",
               "isVip": false
             },
             {
               "name": "MissKiwi2002",
               "value": "0:25",
-              "isVip": false
-            },
-            {
-              "name": "NoLife112",
-              "value": "0:28",
               "isVip": false
             },
             {
@@ -419,12 +419,12 @@
               "isVip": false
             },
             {
-              "name": "ELYRÄ",
-              "value": "1:01",
+              "name": "Vust001",
+              "value": "0:59",
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 06:01 UTC"
+          "updated": "2026-10-19 14:29 UTC"
         }
       ]
     },
@@ -455,7 +455,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 06:01 UTC"
+          "updated": "2026-10-19 14:29 UTC"
         },
         {
           "key": "paintings",
@@ -474,7 +474,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 06:01 UTC"
+          "updated": "2026-10-19 14:29 UTC"
         },
         {
           "key": "keys",
@@ -488,7 +488,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 06:01 UTC"
+          "updated": "2026-10-19 14:29 UTC"
         },
         {
           "key": "best_time",
@@ -502,7 +502,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 06:01 UTC"
+          "updated": "2026-10-19 14:29 UTC"
         }
       ]
     }
