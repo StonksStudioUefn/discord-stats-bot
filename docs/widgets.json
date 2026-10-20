@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-19 20:28 UTC",
+  "updated": "2026-10-20 00:10 UTC",
   "games": [
     {
       "key": "laser_for_brainrots",
@@ -73,7 +73,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 20:28 UTC"
+          "updated": "2026-10-20 00:10 UTC"
         },
         {
           "key": "cash",
@@ -132,7 +132,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 20:28 UTC"
+          "updated": "2026-10-20 00:10 UTC"
         }
       ]
     },
@@ -157,7 +157,7 @@
           "emoji": "💰",
           "color": "#ffde20",
           "rows": [],
-          "updated": "2026-10-19 20:28 UTC"
+          "updated": "2026-10-20 00:10 UTC"
         },
         {
           "key": "cash",
@@ -165,7 +165,7 @@
           "emoji": "💵",
           "color": "#00e10c",
           "rows": [],
-          "updated": "2026-10-19 20:28 UTC"
+          "updated": "2026-10-20 00:10 UTC"
         }
       ]
     },
@@ -206,7 +206,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 20:28 UTC"
+          "updated": "2026-10-20 00:10 UTC"
         },
         {
           "key": "cash",
@@ -230,7 +230,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 20:28 UTC"
+          "updated": "2026-10-20 00:10 UTC"
         }
       ]
     },
@@ -261,6 +261,11 @@
               "isVip": false
             },
             {
+              "name": "DannyMk8",
+              "value": "468",
+              "isVip": false
+            },
+            {
               "name": "RuGRatsz_94",
               "value": "97",
               "isVip": false
@@ -268,6 +273,11 @@
             {
               "name": "happa",
               "value": "70",
+              "isVip": false
+            },
+            {
+              "name": "SIMIloveGOD",
+              "value": "69",
               "isVip": false
             },
             {
@@ -294,19 +304,9 @@
               "name": "ImASweat2707",
               "value": "50",
               "isVip": false
-            },
-            {
-              "name": "TinyJesus03",
-              "value": "44",
-              "isVip": false
-            },
-            {
-              "name": "ELYRÄ",
-              "value": "44",
-              "isVip": false
             }
           ],
-          "updated": "2026-10-19 20:28 UTC"
+          "updated": "2026-10-20 00:10 UTC"
         },
         {
           "key": "hay",
@@ -317,6 +317,11 @@
             {
               "name": "MR x TEXAS",
               "value": "1.6M",
+              "isVip": false
+            },
+            {
+              "name": "DannyMk8",
+              "value": "1.1M",
               "isVip": false
             },
             {
@@ -358,14 +363,9 @@
               "name": "NoLife112",
               "value": "386.8K",
               "isVip": false
-            },
-            {
-              "name": "Nomate_CORGOAT",
-              "value": "360.8K",
-              "isVip": false
             }
           ],
-          "updated": "2026-10-19 20:28 UTC"
+          "updated": "2026-10-20 00:10 UTC"
         },
         {
           "key": "best_time",
@@ -384,6 +384,16 @@
               "isVip": false
             },
             {
+              "name": "DannyMk8",
+              "value": "0:08",
+              "isVip": false
+            },
+            {
+              "name": "SIMIloveGOD",
+              "value": "0:18",
+              "isVip": false
+            },
+            {
               "name": "MissKiwi2002",
               "value": "0:25",
               "isVip": false
@@ -391,6 +401,11 @@
             {
               "name": "Memfox14",
               "value": "0:30",
+              "isVip": false
+            },
+            {
+              "name": "Xehanort_r4",
+              "value": "0:34",
               "isVip": false
             },
             {
@@ -407,24 +422,9 @@
               "name": "TurtleSackX",
               "value": "0:47",
               "isVip": false
-            },
-            {
-              "name": "NathanielClassic",
-              "value": "0:48",
-              "isVip": false
-            },
-            {
-              "name": "Bad Jedi Juice",
-              "value": "0:49",
-              "isVip": false
-            },
-            {
-              "name": "ytb-_geno",
-              "value": "0:53",
-              "isVip": false
             }
           ],
-          "updated": "2026-10-19 20:28 UTC"
+          "updated": "2026-10-20 00:10 UTC"
         }
       ]
     },
@@ -455,7 +455,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 20:28 UTC"
+          "updated": "2026-10-20 00:10 UTC"
         },
         {
           "key": "paintings",
@@ -474,7 +474,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 20:28 UTC"
+          "updated": "2026-10-20 00:10 UTC"
         },
         {
           "key": "keys",
@@ -488,7 +488,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 20:28 UTC"
+          "updated": "2026-10-20 00:10 UTC"
         },
         {
           "key": "best_time",
@@ -502,7 +502,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-19 20:28 UTC"
+          "updated": "2026-10-20 00:10 UTC"
         }
       ]
     }
