@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-20 00:10 UTC",
+  "updated": "2026-10-20 05:46 UTC",
   "games": [
     {
       "key": "laser_for_brainrots",
@@ -73,7 +73,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-20 00:10 UTC"
+          "updated": "2026-10-20 05:46 UTC"
         },
         {
           "key": "cash",
@@ -132,7 +132,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-20 00:10 UTC"
+          "updated": "2026-10-20 05:46 UTC"
         }
       ]
     },
@@ -157,7 +157,7 @@
           "emoji": "💰",
           "color": "#ffde20",
           "rows": [],
-          "updated": "2026-10-20 00:10 UTC"
+          "updated": "2026-10-20 05:46 UTC"
         },
         {
           "key": "cash",
@@ -165,7 +165,7 @@
           "emoji": "💵",
           "color": "#00e10c",
           "rows": [],
-          "updated": "2026-10-20 00:10 UTC"
+          "updated": "2026-10-20 05:46 UTC"
         }
       ]
     },
@@ -206,7 +206,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-20 00:10 UTC"
+          "updated": "2026-10-20 05:46 UTC"
         },
         {
           "key": "cash",
@@ -230,7 +230,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-20 00:10 UTC"
+          "updated": "2026-10-20 05:46 UTC"
         }
       ]
     },
@@ -257,7 +257,7 @@
           "rows": [
             {
               "name": "MR x TEXAS",
-              "value": "500",
+              "value": "700",
               "isVip": false
             },
             {
@@ -286,6 +286,11 @@
               "isVip": false
             },
             {
+              "name": "TinyJesus03",
+              "value": "64",
+              "isVip": false
+            },
+            {
               "name": "AAOxSWEETx",
               "value": "60",
               "isVip": false
@@ -299,14 +304,9 @@
               "name": "NoLife112",
               "value": "51",
               "isVip": false
-            },
-            {
-              "name": "ImASweat2707",
-              "value": "50",
-              "isVip": false
             }
           ],
-          "updated": "2026-10-20 00:10 UTC"
+          "updated": "2026-10-20 05:46 UTC"
         },
         {
           "key": "hay",
@@ -316,7 +316,7 @@
           "rows": [
             {
               "name": "MR x TEXAS",
-              "value": "1.6M",
+              "value": "2M",
               "isVip": false
             },
             {
@@ -350,13 +350,13 @@
               "isVip": false
             },
             {
-              "name": "ImASweat2707",
-              "value": "451.1K",
+              "name": "TinyJesus03",
+              "value": "518.7K",
               "isVip": false
             },
             {
-              "name": "TinyJesus03",
-              "value": "414K",
+              "name": "ImASweat2707",
+              "value": "451.1K",
               "isVip": false
             },
             {
@@ -365,7 +365,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-20 00:10 UTC"
+          "updated": "2026-10-20 05:46 UTC"
         },
         {
           "key": "best_time",
@@ -389,8 +389,18 @@
               "isVip": false
             },
             {
+              "name": "Brack cooks",
+              "value": "0:09",
+              "isVip": false
+            },
+            {
               "name": "SIMIloveGOD",
               "value": "0:18",
+              "isVip": false
+            },
+            {
+              "name": "TinyJesus03",
+              "value": "0:25",
               "isVip": false
             },
             {
@@ -409,22 +419,12 @@
               "isVip": false
             },
             {
-              "name": "TinyJesus03",
-              "value": "0:36",
-              "isVip": false
-            },
-            {
               "name": "Nomate_CORGOAT",
               "value": "0:46",
               "isVip": false
-            },
-            {
-              "name": "TurtleSackX",
-              "value": "0:47",
-              "isVip": false
             }
           ],
-          "updated": "2026-10-20 00:10 UTC"
+          "updated": "2026-10-20 05:46 UTC"
         }
       ]
     },
@@ -455,7 +455,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-20 00:10 UTC"
+          "updated": "2026-10-20 05:46 UTC"
         },
         {
           "key": "paintings",
@@ -474,7 +474,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-20 00:10 UTC"
+          "updated": "2026-10-20 05:46 UTC"
         },
         {
           "key": "keys",
@@ -488,7 +488,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-20 00:10 UTC"
+          "updated": "2026-10-20 05:46 UTC"
         },
         {
           "key": "best_time",
@@ -502,7 +502,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-20 00:10 UTC"
+          "updated": "2026-10-20 05:46 UTC"
         }
       ]
     }
