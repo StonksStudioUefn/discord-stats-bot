@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-20 05:46 UTC",
+  "updated": "2026-10-21 04:04 UTC",
   "games": [
     {
       "key": "laser_for_brainrots",
@@ -73,7 +73,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-20 05:46 UTC"
+          "updated": "2026-10-21 04:04 UTC"
         },
         {
           "key": "cash",
@@ -132,7 +132,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-20 05:46 UTC"
+          "updated": "2026-10-21 04:04 UTC"
         }
       ]
     },
@@ -157,7 +157,7 @@
           "emoji": "💰",
           "color": "#ffde20",
           "rows": [],
-          "updated": "2026-10-20 05:46 UTC"
+          "updated": "2026-10-21 04:04 UTC"
         },
         {
           "key": "cash",
@@ -165,7 +165,7 @@
           "emoji": "💵",
           "color": "#00e10c",
           "rows": [],
-          "updated": "2026-10-20 05:46 UTC"
+          "updated": "2026-10-21 04:04 UTC"
         }
       ]
     },
@@ -206,7 +206,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-20 05:46 UTC"
+          "updated": "2026-10-21 04:04 UTC"
         },
         {
           "key": "cash",
@@ -230,7 +230,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-20 05:46 UTC"
+          "updated": "2026-10-21 04:04 UTC"
         }
       ]
     },
@@ -257,7 +257,7 @@
           "rows": [
             {
               "name": "MR x TEXAS",
-              "value": "700",
+              "value": "710",
               "isVip": false
             },
             {
@@ -306,7 +306,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-20 05:46 UTC"
+          "updated": "2026-10-21 04:04 UTC"
         },
         {
           "key": "hay",
@@ -316,7 +316,7 @@
           "rows": [
             {
               "name": "MR x TEXAS",
-              "value": "2M",
+              "value": "2.2M",
               "isVip": false
             },
             {
@@ -365,7 +365,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-20 05:46 UTC"
+          "updated": "2026-10-21 04:04 UTC"
         },
         {
           "key": "best_time",
@@ -424,7 +424,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-20 05:46 UTC"
+          "updated": "2026-10-21 04:04 UTC"
         }
       ]
     },
@@ -455,7 +455,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-20 05:46 UTC"
+          "updated": "2026-10-21 04:04 UTC"
         },
         {
           "key": "paintings",
@@ -474,7 +474,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-20 05:46 UTC"
+          "updated": "2026-10-21 04:04 UTC"
         },
         {
           "key": "keys",
@@ -488,7 +488,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-20 05:46 UTC"
+          "updated": "2026-10-21 04:04 UTC"
         },
         {
           "key": "best_time",
@@ -502,7 +502,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-20 05:46 UTC"
+          "updated": "2026-10-21 04:04 UTC"
         }
       ]
     }
