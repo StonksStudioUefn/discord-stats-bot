@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-21 04:04 UTC",
+  "updated": "2026-10-21 23:07 UTC",
   "games": [
     {
       "key": "laser_for_brainrots",
@@ -73,7 +73,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-21 04:04 UTC"
+          "updated": "2026-10-21 23:07 UTC"
         },
         {
           "key": "cash",
@@ -132,7 +132,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-21 04:04 UTC"
+          "updated": "2026-10-21 23:07 UTC"
         }
       ]
     },
@@ -157,7 +157,7 @@
           "emoji": "💰",
           "color": "#ffde20",
           "rows": [],
-          "updated": "2026-10-21 04:04 UTC"
+          "updated": "2026-10-21 23:07 UTC"
         },
         {
           "key": "cash",
@@ -165,7 +165,7 @@
           "emoji": "💵",
           "color": "#00e10c",
           "rows": [],
-          "updated": "2026-10-21 04:04 UTC"
+          "updated": "2026-10-21 23:07 UTC"
         }
       ]
     },
@@ -206,7 +206,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-21 04:04 UTC"
+          "updated": "2026-10-21 23:07 UTC"
         },
         {
           "key": "cash",
@@ -230,7 +230,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-21 04:04 UTC"
+          "updated": "2026-10-21 23:07 UTC"
         }
       ]
     },
@@ -267,7 +267,7 @@
             },
             {
               "name": "RuGRatsz_94",
-              "value": "97",
+              "value": "169",
               "isVip": false
             },
             {
@@ -306,7 +306,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-21 04:04 UTC"
+          "updated": "2026-10-21 23:07 UTC"
         },
         {
           "key": "hay",
@@ -320,6 +320,11 @@
               "isVip": false
             },
             {
+              "name": "RuGRatsz_94",
+              "value": "1.4M",
+              "isVip": false
+            },
+            {
               "name": "DannyMk8",
               "value": "1.1M",
               "isVip": false
@@ -327,11 +332,6 @@
             {
               "name": "happa",
               "value": "881.9K",
-              "isVip": false
-            },
-            {
-              "name": "RuGRatsz_94",
-              "value": "840.3K",
               "isVip": false
             },
             {
@@ -365,7 +365,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-21 04:04 UTC"
+          "updated": "2026-10-21 23:07 UTC"
         },
         {
           "key": "best_time",
@@ -424,7 +424,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-21 04:04 UTC"
+          "updated": "2026-10-21 23:07 UTC"
         }
       ]
     },
@@ -455,7 +455,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-21 04:04 UTC"
+          "updated": "2026-10-21 23:07 UTC"
         },
         {
           "key": "paintings",
@@ -474,7 +474,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-21 04:04 UTC"
+          "updated": "2026-10-21 23:07 UTC"
         },
         {
           "key": "keys",
@@ -488,7 +488,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-21 04:04 UTC"
+          "updated": "2026-10-21 23:07 UTC"
         },
         {
           "key": "best_time",
@@ -502,7 +502,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-21 04:04 UTC"
+          "updated": "2026-10-21 23:07 UTC"
         }
       ]
     }
