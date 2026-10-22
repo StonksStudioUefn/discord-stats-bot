@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-22 04:05 UTC",
+  "updated": "2026-10-22 14:58 UTC",
   "games": [
     {
       "key": "laser_for_brainrots",
@@ -73,7 +73,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-22 04:05 UTC"
+          "updated": "2026-10-22 14:58 UTC"
         },
         {
           "key": "cash",
@@ -132,7 +132,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-22 04:05 UTC"
+          "updated": "2026-10-22 14:58 UTC"
         }
       ]
     },
@@ -157,7 +157,7 @@
           "emoji": "💰",
           "color": "#ffde20",
           "rows": [],
-          "updated": "2026-10-22 04:05 UTC"
+          "updated": "2026-10-22 14:58 UTC"
         },
         {
           "key": "cash",
@@ -165,7 +165,7 @@
           "emoji": "💵",
           "color": "#00e10c",
           "rows": [],
-          "updated": "2026-10-22 04:05 UTC"
+          "updated": "2026-10-22 14:58 UTC"
         }
       ]
     },
@@ -206,7 +206,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-22 04:05 UTC"
+          "updated": "2026-10-22 14:58 UTC"
         },
         {
           "key": "cash",
@@ -230,7 +230,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-22 04:05 UTC"
+          "updated": "2026-10-22 14:58 UTC"
         }
       ]
     },
@@ -306,7 +306,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-22 04:05 UTC"
+          "updated": "2026-10-22 14:58 UTC"
         },
         {
           "key": "hay",
@@ -345,6 +345,11 @@
               "isVip": false
             },
             {
+              "name": "nekoao084",
+              "value": "532.8K",
+              "isVip": false
+            },
+            {
               "name": "ArtKor_97",
               "value": "525.3K",
               "isVip": false
@@ -358,14 +363,9 @@
               "name": "ImASweat2707",
               "value": "451.1K",
               "isVip": false
-            },
-            {
-              "name": "NoLife112",
-              "value": "386.8K",
-              "isVip": false
             }
           ],
-          "updated": "2026-10-22 04:05 UTC"
+          "updated": "2026-10-22 14:58 UTC"
         },
         {
           "key": "best_time",
@@ -424,7 +424,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-22 04:05 UTC"
+          "updated": "2026-10-22 14:58 UTC"
         }
       ]
     },
@@ -455,7 +455,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-22 04:05 UTC"
+          "updated": "2026-10-22 14:58 UTC"
         },
         {
           "key": "paintings",
@@ -474,7 +474,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-22 04:05 UTC"
+          "updated": "2026-10-22 14:58 UTC"
         },
         {
           "key": "keys",
@@ -488,7 +488,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-22 04:05 UTC"
+          "updated": "2026-10-22 14:58 UTC"
         },
         {
           "key": "best_time",
@@ -502,7 +502,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-22 04:05 UTC"
+          "updated": "2026-10-22 14:58 UTC"
         }
       ]
     }
