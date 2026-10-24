@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-24 17:59 UTC",
+  "updated": "2026-10-24 23:01 UTC",
   "games": [
     {
       "key": "laser_for_brainrots",
@@ -73,7 +73,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-24 17:59 UTC"
+          "updated": "2026-10-24 23:01 UTC"
         },
         {
           "key": "cash",
@@ -132,7 +132,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-24 17:59 UTC"
+          "updated": "2026-10-24 23:01 UTC"
         }
       ]
     },
@@ -157,7 +157,7 @@
           "emoji": "💰",
           "color": "#ffde20",
           "rows": [],
-          "updated": "2026-10-24 17:59 UTC"
+          "updated": "2026-10-24 23:01 UTC"
         },
         {
           "key": "cash",
@@ -165,7 +165,7 @@
           "emoji": "💵",
           "color": "#00e10c",
           "rows": [],
-          "updated": "2026-10-24 17:59 UTC"
+          "updated": "2026-10-24 23:01 UTC"
         }
       ]
     },
@@ -206,7 +206,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-24 17:59 UTC"
+          "updated": "2026-10-24 23:01 UTC"
         },
         {
           "key": "cash",
@@ -230,7 +230,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-24 17:59 UTC"
+          "updated": "2026-10-24 23:01 UTC"
         }
       ]
     },
@@ -306,7 +306,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-24 17:59 UTC"
+          "updated": "2026-10-24 23:01 UTC"
         },
         {
           "key": "hay",
@@ -350,6 +350,11 @@
               "isVip": false
             },
             {
+              "name": "a16brwd",
+              "value": "533.7K",
+              "isVip": false
+            },
+            {
               "name": "nekoao084",
               "value": "532.8K",
               "isVip": false
@@ -358,14 +363,9 @@
               "name": "ArtKor_97",
               "value": "525.3K",
               "isVip": false
-            },
-            {
-              "name": "Snoxy Bot!!",
-              "value": "522.3K",
-              "isVip": false
             }
           ],
-          "updated": "2026-10-24 17:59 UTC"
+          "updated": "2026-10-24 23:01 UTC"
         },
         {
           "key": "best_time",
@@ -424,7 +424,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-24 17:59 UTC"
+          "updated": "2026-10-24 23:01 UTC"
         }
       ]
     },
@@ -455,7 +455,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-24 17:59 UTC"
+          "updated": "2026-10-24 23:01 UTC"
         },
         {
           "key": "paintings",
@@ -474,7 +474,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-24 17:59 UTC"
+          "updated": "2026-10-24 23:01 UTC"
         },
         {
           "key": "keys",
@@ -488,7 +488,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-24 17:59 UTC"
+          "updated": "2026-10-24 23:01 UTC"
         },
         {
           "key": "best_time",
@@ -502,7 +502,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-24 17:59 UTC"
+          "updated": "2026-10-24 23:01 UTC"
         }
       ]
     }
