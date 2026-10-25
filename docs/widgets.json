@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-25 17:32 UTC",
+  "updated": "2026-10-25 23:58 UTC",
   "games": [
     {
       "key": "laser_for_brainrots",
@@ -68,7 +68,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-25 17:32 UTC"
+          "updated": "2026-10-25 23:58 UTC"
         },
         {
           "key": "cash",
@@ -127,7 +127,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-25 17:32 UTC"
+          "updated": "2026-10-25 23:58 UTC"
         }
       ]
     },
@@ -147,7 +147,7 @@
           "emoji": "💰",
           "color": "#ffde20",
           "rows": [],
-          "updated": "2026-10-25 17:32 UTC"
+          "updated": "2026-10-25 23:58 UTC"
         },
         {
           "key": "cash",
@@ -155,7 +155,7 @@
           "emoji": "💵",
           "color": "#00e10c",
           "rows": [],
-          "updated": "2026-10-25 17:32 UTC"
+          "updated": "2026-10-25 23:58 UTC"
         }
       ]
     },
@@ -191,7 +191,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-25 17:32 UTC"
+          "updated": "2026-10-25 23:58 UTC"
         },
         {
           "key": "cash",
@@ -215,7 +215,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-25 17:32 UTC"
+          "updated": "2026-10-25 23:58 UTC"
         }
       ]
     },
@@ -286,7 +286,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-25 17:32 UTC"
+          "updated": "2026-10-25 23:58 UTC"
         },
         {
           "key": "hay",
@@ -345,7 +345,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-25 17:32 UTC"
+          "updated": "2026-10-25 23:58 UTC"
         },
         {
           "key": "best_time",
@@ -404,7 +404,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-25 17:32 UTC"
+          "updated": "2026-10-25 23:58 UTC"
         }
       ]
     },
@@ -428,9 +428,14 @@
               "name": "lemon-napkin",
               "value": "39",
               "isVip": false
+            },
+            {
+              "name": "VooDooFroggie",
+              "value": "28",
+              "isVip": false
             }
           ],
-          "updated": "2026-10-25 17:32 UTC"
+          "updated": "2026-10-25 23:58 UTC"
         },
         {
           "key": "paintings",
@@ -444,12 +449,17 @@
               "isVip": false
             },
             {
+              "name": "VooDooFroggie",
+              "value": "33",
+              "isVip": false
+            },
+            {
               "name": "الحسنツ",
               "value": "4",
               "isVip": false
             }
           ],
-          "updated": "2026-10-25 17:32 UTC"
+          "updated": "2026-10-25 23:58 UTC"
         },
         {
           "key": "keys",
@@ -461,9 +471,14 @@
               "name": "lemon-napkin",
               "value": "1.06M",
               "isVip": false
+            },
+            {
+              "name": "VooDooFroggie",
+              "value": "633.04K",
+              "isVip": false
             }
           ],
-          "updated": "2026-10-25 17:32 UTC"
+          "updated": "2026-10-25 23:58 UTC"
         },
         {
           "key": "best_time",
@@ -475,9 +490,14 @@
               "name": "lemon-napkin",
               "value": "6:29",
               "isVip": false
+            },
+            {
+              "name": "VooDooFroggie",
+              "value": "10:48",
+              "isVip": false
             }
           ],
-          "updated": "2026-10-25 17:32 UTC"
+          "updated": "2026-10-25 23:58 UTC"
         }
       ]
     }
