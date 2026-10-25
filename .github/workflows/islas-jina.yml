@@ -1,0 +1,41 @@
+name: Islas por Jina
+
+# Lee por r.jina.ai, desde los runners de GitHub, las miniaturas de las islas y las fotos de
+# los creadores que el servicio de islas de STONKS no consigue desde Cloudflare (Jina sin clave
+# da 429 a su IP de salida compartida), y se las da. Va en este repo porque es público: los
+# minutos de Actions son gratis. Los logs también son públicos: el script solo imprime cuentas.
+#
+# El servicio solo acepta el pase OIDC de este flujo, en main, programado o lanzado a mano:
+# si se cambia el nombre de este fichero, la rama o el repo, hay que cambiar `PASE` en
+# islas/src/github.ts de stonks-ecosistema/ecosistema.
+
+on:
+  schedule:
+    # Después de la pasada del día del servicio (desde las 04:00 UTC).
+    - cron: "17 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  # Para pedir el pase OIDC: sin secreto guardado en ningún sitio.
+  id-token: write
+
+concurrency:
+  group: islas-jina
+  cancel-in-progress: false
+
+jobs:
+  islas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Descargar el script
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: herramientas
+          persist-credentials: false
+
+      - name: Leer a Jina y dárselo al servicio de islas
+        # El Node que trae el runner (20 o más nuevo): el script no tiene dependencias.
+        run: node herramientas/islas_jina.mjs
