@@ -11,8 +11,11 @@ name: Islas por Jina
 
 on:
   schedule:
-    # Después de la pasada del día del servicio (desde las 04:00 UTC).
+    # Después de la pasada del día del servicio (desde las 04:00 UTC): la vuelta entera.
     - cron: "17 5 * * *"
+    # Solo lo que alguien ha pedido leer ya (un mapa nuevo en finanzas, islas.actualizar):
+    # casi siempre nada, y acaba en segundos.
+    - cron: "7,22,37,52 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -39,3 +42,5 @@ jobs:
       - name: Leer a Jina y dárselo al servicio de islas
         # El Node que trae el runner (20 o más nuevo): el script no tiene dependencias.
         run: node herramientas/islas_jina.mjs
+        env:
+          FORZADAS: ${{ github.event_name == 'schedule' && github.event.schedule != '17 5 * * *' && '1' || '0' }}

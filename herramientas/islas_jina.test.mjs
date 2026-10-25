@@ -1,13 +1,18 @@
 // Lo que no sale a la red de islas_jina.mjs: node --test herramientas/islas_jina.test.mjs
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { CODIGO, CREADOR, destinoValido, esperaDe, lotes, MAX_CUERPO, recortar, ritmo } from "./islas_jina.mjs";
+import { CODIGO, CREADOR, destinoValido, esperaDe, lotes, MAX_CUERPO, pedido, recortar, ritmo } from "./islas_jina.mjs";
 
 test("códigos: solo los de isla y de creador, antes de montar una dirección", () => {
 	assert.ok(CODIGO.test("1234-5678-9012"));
 	for (const malo of ["1234-5678-901", "1234 5678 9012", "1234-5678-9012&x=1", "../1234-5678-9012"]) assert.ok(!CODIGO.test(malo), malo);
 	assert.ok(CREADOR.test("dani280n2") && CREADOR.test("a_b-c"));
 	for (const malo of ["Sonoq", "a/b", "a?b", "", "x".repeat(33), "a b"]) assert.ok(!CREADOR.test(malo), malo);
+});
+
+test("las vueltas de 15 min piden solo lo forzado; la del día, todo", () => {
+	assert.deepEqual(pedido(true), { forzadas: true });
+	assert.deepEqual(pedido(false), {});
 });
 
 test("el pase solo va al servicio de verdad o a uno en local", () => {
