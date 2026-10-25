@@ -5,7 +5,7 @@ Genera el archivo docs/widgets.json que alimenta la página web de
 GitHub Pages. Contiene, por cada juego y stat, el top (nombre, valor
 formateado, VIP) y los metadatos para mostrarlo bien en la web (título,
 color, emoji, fecha), más los datos públicos del mapa (nombre oficial,
-enlace a fortnite.gg e imagen; ver fortnite_gg.py).
+enlace a fortnite.gg e imagen, del servicio común de islas; ver fortnite_gg.py).
 
 El bot llama a generar_widgets_json() al final de cada actualización;
 el workflow de GitHub Actions hace luego commit+push de este archivo,
@@ -67,7 +67,7 @@ async def _islas(juegos: dict[str, dict]) -> dict[str, dict]:
     """
     Nombre, enlace e imagen del mapa de cada juego (fortnite_gg.py). Lo que
     no se pueda sacar ahora se conserva de la última vez, para que un fallo
-    puntual de fortnite.gg no deje la web sin imágenes.
+    puntual del servicio de islas no deje la web sin imágenes.
     """
     codigos = {
         k: normalizar_codigo(cfg.get("island_code", ""))
@@ -76,7 +76,7 @@ async def _islas(juegos: dict[str, dict]) -> dict[str, dict]:
     codigos = {k: c for k, c in codigos.items() if c}
     try:
         nuevas = await info_islas(codigos)
-    except Exception as e:  # la web no debe caerse por fortnite.gg
+    except Exception as e:  # la web no debe caerse por el servicio de islas
         print(f"[WEB] No pude consultar las islas: {e}")
         nuevas = {}
     anteriores = _islas_anteriores()

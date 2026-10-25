@@ -478,76 +478,43 @@ async function copyText(text, ok) {
   ok();
 }
 
-/* ── Jugadores en cada mapa, en directo desde el navegador ──
-   Epic (api.fortnite.com) tiene CORS abierto y da el pico de jugadores cada
-   10 minutos, con 10-20 min de retraso. Devuelve null si en ese tramo hubo
-   menos de 5 jugadores y 404 si la isla no es pública y descubrible. Solo en
-   esos dos casos se pregunta a fortnite.gg (por r.jina.ai, como FINANZAS:
-   fortnite.gg no da CORS), que es más lento pero tiene la cifra exacta. */
-const EPIC = 'https://api.fortnite.com/ecosystem/v1/islands/';
-const LECTOR = 'https://r.jina.ai/';
-const PLAYERS_EVERY_MS = 3 * 60 * 1000;
+/* ── Jugadores en cada mapa ──
+   Del servicio común de islas de STONKS, que los lee de Epic cada 10 minutos
+   para todas las apps (con CORS abierto y 10 min de caché). Epic da el pico
+   de cada tramo de 10 min con 10-20 min de retraso, y null por debajo de 5. */
+const ISLAS = 'https://islas.stonksstudio.com/publico/islas.json';
+const PLAYERS_EVERY_MS = 10 * 60 * 1000;
 
-async function getJson(url, opts = {}) {
+async function getJson(url) {
   const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), opts.timeout || 12000);
+  const t = setTimeout(() => ctrl.abort(), 12000);
   try {
-    const r = await fetch(url, { signal: ctrl.signal, headers: opts.headers });
-    if (r.status === 404) return { missing: true };
-    if (!r.ok) return null;
-    return await r.json();
+    const r = await fetch(url, { signal: ctrl.signal });
+    return r.ok ? await r.json() : null;
   } catch (_) {
     return null;
   } finally {
     clearTimeout(t);
   }
 }
-const values = j => ((j && j.intervals) || []).filter(i => typeof i.value === 'number');
 
-async function epicPlayers(code) {
-  const [now, day] = await Promise.all([
-    getJson(EPIC + code + '/metrics/minute/peak-ccu'),
-    getJson(EPIC + code + '/metrics/hour/peak-ccu'),
-  ]);
-  if (!now) return null;
-  if (now.missing || !(now.intervals || []).length) return { missing: true };
-  const vals = values(now), last = vals[vals.length - 1];
-  const peaks = values(day).map(i => i.value);
-  return {
-    now: last ? last.value : null,
-    under5: !last,
-    at: last ? new Date(last.timestamp) : null,
-    peak24: peaks.length ? Math.max(...peaks) : null,
-    src: 'Epic',
-  };
-}
-
-async function ggPlayers(code) {
-  const j = await getJson(LECTOR + 'https://fortnite.gg/island?code=' + code,
-    { headers: { Accept: 'application/json' }, timeout: 25000 });
-  const text = j && j.data && !j.data.warning ? String(j.data.content || '') : '';
-  const m = text.match(/Players right now\s+([\d.,]+)\s*(K?)/i);
-  if (!m) return null;
-  const n = Math.round(parseFloat(m[1].replace(/,/g, '')) * (m[2] ? 1000 : 1));
-  return Number.isFinite(n) ? { now: n, under5: false, at: new Date(), src: 'fortnite.gg' } : null;
-}
-
-async function playersOf(g) {
-  const code = islandCode(g);
-  if (!code) return null;
-  const epic = await epicPlayers(code);
-  if (epic && !epic.missing && !epic.under5) return epic;
-  const gg = await ggPlayers(code);
-  if (gg) return { ...gg, peak24: epic && epic.peak24 };
-  return epic && epic.under5 ? epic : null;
+function playersOf(isla) {
+  const p = isla && isla.players;
+  if (!p) return null;
+  if (p.menos_de_5) return { now: null, under5: true, at: null };
+  if (typeof p.now !== 'number') return null;
+  const at = p.at ? new Date(p.at) : null;
+  return { now: p.now, under5: false, at: at && !isNaN(at) ? at : null };
 }
 
 async function refreshPlayers() {
-  await Promise.all(state.data.games.map(async g => {
-    const p = await playersOf(g);
+  const j = await getJson(ISLAS);
+  const porCodigo = new Map(((j && j.islands) || []).map(i => [i.code, i]));
+  state.data.games.forEach(g => {
+    const p = playersOf(porCodigo.get(islandCode(g)));
     if (p || !state.live[g.key]) state.live[g.key] = p || { none: true };
-    renderLive();
-  }));
+  });
+  renderLive();
 }
 
 function renderLive() {
@@ -569,10 +536,7 @@ function renderLive() {
   const on = !p.under5 && p.now > 0;
   live.innerHTML = '<span class="pulse' + (on ? ' on' : '') + '"></span>' +
     (p.under5 ? '<span>&lt; <strong>5</strong> jugando</span>' : '<span><strong>' + fmtN(p.now) + '</strong> jugando</span>');
-  live.title = [
-    p.src + (p.at && p.src === 'Epic' ? ', ' + relTime(p.at) : ''),
-    p.peak24 != null ? 'pico 24 h: ' + fmtN(p.peak24) : '',
-  ].filter(Boolean).join(' · ');
+  live.title = 'Epic' + (p.at ? ', ' + relTime(p.at) : '');
 }
 
 async function load() {
