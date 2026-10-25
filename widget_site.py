@@ -4,8 +4,9 @@ widget_site.py
 Genera el archivo docs/widgets.json que alimenta la página web de
 GitHub Pages. Contiene, por cada juego y stat, el top (nombre, valor
 formateado, VIP) y los metadatos para mostrarlo bien en la web (título,
-color, emoji, fecha), más los datos públicos del mapa (nombre oficial,
-enlace a fortnite.gg e imagen, del servicio común de islas; ver fortnite_gg.py).
+color, emoji, fecha), más el código de isla del mapa y su enlace a
+fortnite.gg (nombre, creador e imagen los lee la web del servicio común
+de islas; ver fortnite_gg.py).
 
 El bot llama a generar_widgets_json() al final de cada actualización;
 el workflow de GitHub Actions hace luego commit+push de este archivo,
@@ -17,7 +18,7 @@ import os
 from datetime import datetime, timezone
 
 from formatting import format_value
-from fortnite_gg import info_islas, normalizar_codigo, url_isla
+from fortnite_gg import normalizar_codigo, url_isla
 from games import GAMES, game_enabled, stat_lower_is_better
 
 _DIR = os.path.dirname(os.path.abspath(__file__))
@@ -49,29 +50,13 @@ def _color_juego(game_config: dict) -> str | None:
     return None
 
 
-async def _islas(juegos: dict[str, dict]) -> dict[str, dict]:
-    """
-    Nombre, enlace e imagen del mapa de cada juego (fortnite_gg.py), tal
-    como los tenga el servicio de islas: él ya guarda lo último bueno.
-    """
-    codigos = {
-        k: normalizar_codigo(cfg.get("island_code", ""))
-        for k, cfg in juegos.items()
-    }
-    codigos = {k: c for k, c in codigos.items() if c}
-    try:
-        nuevas = await info_islas(codigos)
-    except Exception as e:  # la web no debe caerse por el servicio de islas
-        print(f"[WEB] No pude consultar las islas: {e}")
-        nuevas = {}
+def _islas(juegos: dict[str, dict]) -> dict[str, dict]:
+    """El código de isla de cada juego y su enlace: lo demás lo lee la web del servicio."""
     islas = {}
-    for k, codigo in codigos.items():
-        nueva = nuevas.get(k, {})
-        islas[k] = {
-            "code": codigo,
-            "url": url_isla(codigo),
-            **{campo: nueva.get(campo) for campo in ("name", "creator", "thumb")},
-        }
+    for k, cfg in juegos.items():
+        codigo = normalizar_codigo(cfg.get("island_code", ""))
+        if codigo:
+            islas[k] = {"code": codigo, "url": url_isla(codigo)}
     return islas
 
 
@@ -85,7 +70,7 @@ async def generar_widgets_json(obtener_top) -> None:
     ahora = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     juegos = []
     activos = {k: cfg for k, cfg in GAMES.items() if game_enabled(cfg)}
-    islas = await _islas(activos)
+    islas = _islas(activos)
 
     # Los juegos desactivados (enabled: False) no aparecen en la web.
     for game_key, game_config in activos.items():
