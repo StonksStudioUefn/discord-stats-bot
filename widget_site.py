@@ -49,25 +49,10 @@ def _color_juego(game_config: dict) -> str | None:
     return None
 
 
-def _islas_anteriores() -> dict[str, dict]:
-    """La 'island' de cada juego en el widgets.json actual (si lo hay)."""
-    try:
-        with open(WIDGETS_JSON_PATH, encoding="utf-8") as f:
-            doc = json.load(f)
-        return {
-            g["key"]: g["island"]
-            for g in doc.get("games", [])
-            if isinstance(g.get("island"), dict)
-        }
-    except (OSError, ValueError, KeyError, TypeError):
-        return {}
-
-
 async def _islas(juegos: dict[str, dict]) -> dict[str, dict]:
     """
-    Nombre, enlace e imagen del mapa de cada juego (fortnite_gg.py). Lo que
-    no se pueda sacar ahora se conserva de la última vez, para que un fallo
-    puntual del servicio de islas no deje la web sin imágenes.
+    Nombre, enlace e imagen del mapa de cada juego (fortnite_gg.py), tal
+    como los tenga el servicio de islas: él ya guarda lo último bueno.
     """
     codigos = {
         k: normalizar_codigo(cfg.get("island_code", ""))
@@ -79,18 +64,14 @@ async def _islas(juegos: dict[str, dict]) -> dict[str, dict]:
     except Exception as e:  # la web no debe caerse por el servicio de islas
         print(f"[WEB] No pude consultar las islas: {e}")
         nuevas = {}
-    anteriores = _islas_anteriores()
-
     islas = {}
     for k, codigo in codigos.items():
-        isla = {"code": codigo, "url": url_isla(codigo)}
-        previa = anteriores.get(k, {})
-        if previa.get("code") != codigo:
-            previa = {}  # cambió el código: lo de antes es de otra isla
         nueva = nuevas.get(k, {})
-        for campo in ("name", "creator", "released", "icon", "thumb"):
-            isla[campo] = nueva.get(campo) or previa.get(campo)
-        islas[k] = isla
+        islas[k] = {
+            "code": codigo,
+            "url": url_isla(codigo),
+            **{campo: nueva.get(campo) for campo in ("name", "creator", "thumb")},
+        }
     return islas
 
 
