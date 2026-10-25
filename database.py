@@ -13,6 +13,7 @@ Tablas:
     -> Almacén clave/valor para datos sueltos. Lo usamos para:
          last_message:<game>   -> ID del último mensaje procesado en ese canal
          pinned:<game>:<stat>  -> ID del mensaje fijado del Top 10 de esa stat
+         banned:<discord_id>   -> jugador bloqueado (captura falsa)
 """
 
 import asyncio
@@ -185,6 +186,24 @@ async def obtener_top(
     return await asyncio.to_thread(_top_sync, game, stat, limit, ascending)
 
 
+def _borrar_jugador_sync(discord_id: str) -> list[dict]:
+    """
+    Borra TODAS las filas del jugador (todos los juegos y stats).
+    Devuelve las filas borradas para poder mostrarlas en el log.
+    """
+    borradas = (
+        _supabase.table(LEADERBOARD)
+        .delete()
+        .eq("discord_id", discord_id)
+        .execute()
+    )
+    return borradas.data or []
+
+
+async def borrar_jugador(discord_id: str) -> list[dict]:
+    return await asyncio.to_thread(_borrar_jugador_sync, discord_id)
+
+
 # =====================================================================
 #  ESTADO (almacén clave/valor)
 # =====================================================================
@@ -264,6 +283,23 @@ async def listar_pendientes() -> list[tuple[str, int]]:
 async def quitar_pendiente(message_id: str) -> None:
     """Saca una captura de la cola (se procesó bien o se agotó)."""
     await state_delete(f"{_PENDING_PREFIX}{message_id}")
+
+
+# ---------------------------------------------------------------------
+# Jugadores BLOQUEADOS (capturas falsas). Clave: banned:<discord_id>.
+# Sus capturas se ignoran siempre, en silencio.
+# ---------------------------------------------------------------------
+_BANNED_PREFIX = "banned:"
+
+
+async def bloquear_jugador(discord_id: str, motivo: str = "") -> None:
+    await state_set(f"{_BANNED_PREFIX}{discord_id}", motivo)
+
+
+async def listar_bloqueados() -> set[str]:
+    """IDs de Discord de todos los jugadores bloqueados."""
+    filas = await state_list(_BANNED_PREFIX)
+    return {fila["key"][len(_BANNED_PREFIX):] for fila in filas}
 
 
 # Helpers semánticos para que batch_update.py se lea mejor.

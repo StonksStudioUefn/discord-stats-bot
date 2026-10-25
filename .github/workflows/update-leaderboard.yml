@@ -12,6 +12,10 @@ on:
         description: "Responder con datos puestos a mano, SIN leer la captura. ID_o_enlace=juego | player=Nombre | vip=0 | stat=valor ... (varias: separadas por ';'). Ej.: 123=find_the_needle | player=Pepe | wins=97 | hay=840 K | best_time=14:20. Opcional."
         required: false
         default: ""
+      quitar:
+        description: "Capturas FALSAS: enlaces o IDs de sus mensajes (separados por comas o espacios). Saca al autor de la leaderboard (todos los juegos) y lo bloquea. Si el mensaje ya se borró, vale el ID de Discord del jugador. Opcional."
+        required: false
+        default: ""
       silencioso:
         description: "No publicar en Discord ningún mensaje de error/rechazo (solo en el log)."
         type: boolean
@@ -70,6 +74,8 @@ jobs:
           REPROCESAR: ${{ inputs.reprocesar }}
           # Capturas con los datos puestos a mano (solo en ejecución manual).
           MANUAL: ${{ inputs.manual }}
+          # Capturas falsas: sacar y bloquear a sus autores (solo en ejecución manual).
+          QUITAR: ${{ inputs.quitar }}
           # true = no publicar mensajes de error/rechazo en Discord.
           SILENCIOSO: ${{ inputs.silencioso }}
         run: python batch_update.py
