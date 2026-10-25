@@ -2,24 +2,16 @@
 fortnite_gg.py
 ==============
 Datos públicos de la isla de cada juego para la web de widgets: nombre
-oficial del mapa, creador, enlace a fortnite.gg y su imagen.
+oficial del mapa, creador, enlace a fortnite.gg y su miniatura.
 
-De dónde sale cada cosa (como en la app de FINANZAS, js/services/fortniteGg.js):
-  - Nombre y creador: la API pública de Epic
-      https://api.fortnite.com/ecosystem/v1/islands/<código>
-    Si falla, el nombre se recorta del <title> de la ficha de fortnite.gg.
-  - Imagen y fecha de lanzamiento: la ficha de fortnite.gg, leída a través de r.jina.ai
-    (fortnite.gg bloquea las peticiones automáticas). Epic no da imágenes
-    en su API pública.
-
-Icono vs miniatura
-------------------
-Epic ha añadido el «island name logo» (PNG transparente de 1440x608), pero
-a día de hoy ni su API pública ni fortnite.gg lo enseñan: solo la miniatura
-apaisada (landscape_comp*.jpeg). Si alguna vez aparece en la ficha una
-imagen de Epic que parezca el logo (logo/icon/title/name en el nombre del
-archivo) se guarda en 'icon'; la miniatura se guarda siempre en 'thumb' y
-la web la usa cuando no hay icono.
+Todo sale del servicio común de islas de STONKS (stonks-islas), que lo lee
+para todas las apps (Oscar, 25/10/2026): el nombre y el creador, de la API
+pública de Epic una vez al día; la miniatura, de la ficha de fortnite.gg
+una vez al día (Epic no da imágenes); los jugadores, de Epic cada 10 min.
+El bot no habla ni con Epic ni con fortnite.gg: lee
+    https://islas.stonksstudio.com/publico/islas.json
+Las islas tienen que estar registradas como públicas en el servicio
+(islas.registrar del conector STONKS, app «bot»).
 
 Todo lo que viene de aquí es texto de terceros: se limpia y se acota, y la
 web lo escapa al pintarlo. Las imágenes solo se aceptan del CDN de Epic.
@@ -28,12 +20,10 @@ Nada de esto lanza: si algo falla se devuelve lo que se haya podido sacar.
 
 import asyncio
 import re
-from datetime import datetime
 
 import aiohttp
 
-EPIC_API = "https://api.fortnite.com/ecosystem/v1/islands/"
-LECTOR = "https://r.jina.ai/"
+ISLAS_JSON = "https://islas.stonksstudio.com/publico/islas.json"
 ESPERA_S = 25
 MAX_NOMBRE = 120
 
@@ -47,7 +37,6 @@ _CONTROLES = re.compile(
 _IMG_EPIC = re.compile(
     r"https://cdn-\d+\.qstv\.on\.epicgames\.com/[A-Za-z0-9_/.-]+?\.(?:png|jpe?g|webp)"
 )
-_PARECE_ICONO = re.compile(r"(logo|icon|title|name)", re.IGNORECASE)
 
 
 def normalizar_codigo(texto: str) -> str:
@@ -66,47 +55,10 @@ def limpiar_nombre(valor) -> str:
     return t[:MAX_NOMBRE].strip()
 
 
-def _nombre_de_titulo(titulo, codigo: str) -> str:
-    """
-    «NOMBRE CODIGO by autor - Fortnite Creative Map Code» -> «NOMBRE».
-    Solo vale un título que lleve el código: si la isla no existe o salta
-    el reto de Cloudflare, el lector contesta 200 con «Page Not Found» o
-    «Just a moment...», y eso no es un nombre.
-    """
-    t = str(titulo or "")
-    i = t.find(codigo)
-    return limpiar_nombre(t[:i]) if i > 0 else ""
-
-
-def _creador_de_titulo(titulo, codigo: str) -> str:
-    """«NOMBRE CODIGO by autor - Fortnite Creative Map Code» -> «autor»."""
-    m = re.search(re.escape(codigo) + r" by (.+?) - Fortnite", str(titulo or ""))
-    return limpiar_nombre(m[1]) if m else ""
-
-
-def _fecha_de_contenido(contenido: str) -> str | None:
-    """«Released:May 17, 2026» de la ficha -> '2026-05-17'."""
-    m = re.search(r"Released:\s*([A-Z][a-z]{2} \d{1,2}, \d{4})", contenido or "")
-    if not m:
-        return None
-    try:
-        return datetime.strptime(m[1], "%b %d, %Y").strftime("%Y-%m-%d")
-    except ValueError:
-        return None
-
-
-def _elegir_imagenes(contenido: str) -> dict:
-    """De las imágenes de Epic que trae la ficha: el icono (si lo hay) y la miniatura."""
-    urls = list(dict.fromkeys(_IMG_EPIC.findall(contenido or "")))
-    nombre = lambda u: u.rsplit("/", 1)[-1]
-    icono = next((u for u in urls if _PARECE_ICONO.search(nombre(u))), None)
-    apaisadas = [u for u in urls if nombre(u).startswith("landscape")]
-    # La pequeña (480x270) basta para la web; si no está, la grande.
-    miniatura = next(
-        (u for u in apaisadas if "_comp_s" in nombre(u)),
-        apaisadas[0] if apaisadas else None,
-    )
-    return {"icon": icono, "thumb": miniatura}
+def miniatura(url) -> str | None:
+    """La URL solo si es del CDN de Epic: va tal cual a un src de la web."""
+    u = str(url or "")
+    return u if len(u) <= 400 and _IMG_EPIC.fullmatch(u) else None
 
 
 async def _json(sesion: aiohttp.ClientSession, url: str, **kw):
@@ -121,51 +73,31 @@ async def _json(sesion: aiohttp.ClientSession, url: str, **kw):
         return None
 
 
-async def info_isla(sesion: aiohttp.ClientSession, codigo_crudo: str) -> dict | None:
-    """
-    {code, url, name, creator, released, icon, thumb} de la isla. Los campos que no
-    se hayan podido sacar van a None. None si el código no es válido.
-    """
-    codigo = normalizar_codigo(codigo_crudo)
-    if not codigo:
-        return None
-
-    epic, gg = await asyncio.gather(
-        _json(sesion, EPIC_API + codigo),
-        _json(
-            sesion,
-            LECTOR + url_isla(codigo),
-            headers={"Accept": "application/json"},
-        ),
-    )
-
-    nombre = limpiar_nombre((epic or {}).get("title"))
-    creador = limpiar_nombre((epic or {}).get("creatorCode"))
-
-    datos_gg = (gg or {}).get("data") or {}
-    if datos_gg.get("warning") or (gg or {}).get("warning"):
-        datos_gg = {}
-    if not nombre:
-        nombre = _nombre_de_titulo(datos_gg.get("title"), codigo)
-    if not creador:
-        creador = _creador_de_titulo(datos_gg.get("title"), codigo)
-
-    return {
-        "code": codigo,
-        "url": url_isla(codigo),
-        "name": nombre or None,
-        "creator": creador or None,
-        "released": _fecha_de_contenido(datos_gg.get("content", "")),
-        **_elegir_imagenes(datos_gg.get("content", "")),
-    }
-
-
 async def info_islas(codigos: dict[str, str]) -> dict[str, dict]:
-    """{clave_juego: código} -> {clave_juego: info_isla}, todas a la vez."""
+    """
+    {clave_juego: código} -> {clave_juego: {code, url, name, creator, thumb}}.
+    Los campos que el servicio aún no tenga van a None; las islas que no
+    salgan en el JSON (no registradas o sin leer), no aparecen.
+    """
     timeout = aiohttp.ClientTimeout(total=ESPERA_S)
     async with aiohttp.ClientSession(timeout=timeout) as sesion:
-        claves = list(codigos)
-        resultados = await asyncio.gather(
-            *(info_isla(sesion, codigos[k]) for k in claves)
-        )
-    return {k: r for k, r in zip(claves, resultados) if r}
+        doc = await _json(sesion, ISLAS_JSON)
+    por_codigo = {
+        normalizar_codigo(i.get("code")): i
+        for i in (doc or {}).get("islands") or []
+        if isinstance(i, dict)
+    }
+    islas = {}
+    for clave, crudo in codigos.items():
+        codigo = normalizar_codigo(crudo)
+        isla = por_codigo.get(codigo) if codigo else None
+        if not isla:
+            continue
+        islas[clave] = {
+            "code": codigo,
+            "url": url_isla(codigo),
+            "name": limpiar_nombre(isla.get("name")) or None,
+            "creator": limpiar_nombre(isla.get("creator")) or None,
+            "thumb": miniatura(isla.get("thumb_url")),
+        }
+    return islas
