@@ -15,6 +15,8 @@ Cada ejecución (manual desde GitHub Actions o por cron):
          rechaza con mensaje al jugador.
        - Si coincide: guarda en BD las stats del juego, responde al
          jugador con la confirmación.
+     Antes, si un moderador lo pide (input 'quitar'), saca de la
+     leaderboard al autor de una captura falsa y lo bloquea.
   4. Refresca un EMBED por juego en el canal de leaderboards.
   5. Refresca un mensaje con .json adjunto por juego en el canal de
      resumen para moderadores.
@@ -30,6 +32,8 @@ import discord
 
 from config import DISCORD_TOKEN
 from database import (
+    bloquear_jugador,
+    borrar_jugador,
     guardar_stat,
     guardar_ultimo_mensaje_global,
     guardar_id_embed,
@@ -37,6 +41,7 @@ from database import (
     obtener_top,
     obtener_ultimo_mensaje_global,
     añadir_pendiente,
+    listar_bloqueados,
     listar_pendientes,
     quitar_pendiente,
 )
@@ -168,6 +173,11 @@ async def _procesar_mensaje(message: discord.Message) -> str | None:
     Devuelve la clave del juego al que se asignó (para saber qué embeds
     refrescar al final), o None si se rechazó.
     """
+    # Jugador bloqueado por captura falsa: se ignora en silencio.
+    if str(message.author.id) in BLOQUEADOS:
+        print(f"[INFO] msg {message.id}: autor {message.author.id} bloqueado; ignoro la captura.")
+        return None
+
     # Datos puestos a mano (input 'manual'): no se lee la captura, así que
     # vale aunque la imagen esté tapada o Gemini la lea mal.
     manual = DATOS_MANUALES.get(str(message.id))
@@ -325,6 +335,9 @@ JUEGO_FORZADO: dict[str, str] = {}
 # (input 'manual'): sustituyen a lo que leería Gemini.
 DATOS_MANUALES: dict[str, dict] = {}
 
+# IDs de Discord de los jugadores bloqueados (input 'quitar').
+BLOQUEADOS: set[str] = set()
+
 # Mensajes ya procesados por la cola en esta ejecución: la tanda de
 # mensajes nuevos se los salta para no responder dos veces.
 PROCESADOS_EN_COLA: set[str] = set()
@@ -406,6 +419,61 @@ def _ids_a_reprocesar() -> list[tuple[str, str | None]]:
             continue
         salida.append((ultimo, juego))
     return salida
+
+
+def _ids_a_quitar() -> list[str]:
+    """
+    Capturas falsas (input 'quitar' del workflow -> variable QUITAR).
+    Mismo formato que 'reprocesar': IDs o enlaces de Discord separados
+    por comas, espacios o saltos de línea. También vale el ID de
+    Discord del jugador, por si el mensaje ya se borró al banearlo.
+    """
+    crudo = os.environ.get("QUITAR", "")
+    salida = []
+    for trozo in crudo.replace(",", " ").split():
+        ultimo = trozo.rstrip("/").split("/")[-1]
+        if not ultimo.isdigit():
+            print(f"[WARN] quitar: no entiendo '{trozo}'; lo ignoro.")
+            continue
+        salida.append(ultimo)
+    return salida
+
+
+async def _quitar_jugadores(c_submit: discord.TextChannel) -> None:
+    """
+    Por cada captura falsa pedida: saca a su autor de la leaderboard
+    (todos los juegos y stats) y lo bloquea para que sus capturas se
+    ignoren siempre. No responde nada en Discord.
+    """
+    for ref in _ids_a_quitar():
+        try:
+            message = await c_submit.fetch_message(int(ref))
+            # Enlace a la respuesta del bot en vez de a la captura: vamos
+            # al mensaje original al que respondió.
+            if message.author == client.user and message.reference:
+                message = await c_submit.fetch_message(message.reference.message_id)
+            discord_id = str(message.author.id)
+            print(f"[QUITAR] msg {ref}: autor {message.author} ({discord_id}).")
+        except discord.NotFound:
+            # El mensaje no está (borrado al banear) o es un ID de usuario.
+            discord_id = ref
+            print(f"[QUITAR] {ref} no es un mensaje de #{SUBMIT_CHANNEL}; lo trato como ID de jugador.")
+        except discord.HTTPException as e:
+            print(f"[WARN] quitar: no pude recuperar {ref}: {e}. Lo salto.")
+            continue
+
+        borradas = await borrar_jugador(discord_id)
+        for fila in borradas:
+            print(
+                f"[QUITAR]   borrado {fila['game']}/{fila['stat']} = "
+                f"{fila['best_value']} ({fila['username']})"
+            )
+        if not borradas:
+            print(f"[QUITAR]   {discord_id} no tenía nada en la leaderboard.")
+
+        await bloquear_jugador(discord_id, f"captura falsa: {ref}")
+        BLOQUEADOS.add(discord_id)
+        print(f"[QUITAR]   {discord_id} bloqueado: sus capturas se ignorarán.")
 
 
 # Nº máximo de pasadas (ejecuciones) que reintentamos una captura en cola
@@ -602,6 +670,11 @@ async def on_ready():
                     limit=MAX_POR_EJECUCION, after=despues_de, oldest_first=True
                 )
             ]
+
+        # --- Capturas falsas: sacar y bloquear a sus autores ANTES de
+        #     procesar nada, para que no se cuele ninguna otra suya.
+        BLOQUEADOS.update(await listar_bloqueados())
+        await _quitar_jugadores(c_submit)
 
         # --- Procesar la COLA de pendientes primero (capturas que
         #     fallaron por errores transitorios de Gemini en pasadas
