@@ -6,6 +6,7 @@
 // Los logs de este repo son públicos: solo cuentas y tiempos. Nunca códigos, direcciones,
 // títulos, lo que contesta Jina ni el pase.
 //
+// FORZADAS=1 (las vueltas de cada 15 min): solo las islas que alguien ha pedido leer ya.
 // SECO=1: pide los pendientes y lee a Jina, pero no manda nada al servicio. Para probar en
 // local: ISLAS_URL=http://localhost:8787 y JINA_URL=<un Jina de mentira>.
 import { pathToFileURL } from "node:url";
@@ -13,6 +14,7 @@ import { pathToFileURL } from "node:url";
 const SERVICIO = process.env.ISLAS_URL || "https://islas.stonksstudio.com";
 const JINA = process.env.JINA_URL || "https://r.jina.ai/";
 const SECO = process.env.SECO === "1";
+const FORZADAS = process.env.FORZADAS === "1";
 const AUDIENCIA = "islas.stonksstudio.com";
 const AGENTE = "stonks-islas desde GitHub (discord-stats-bot)";
 
@@ -32,6 +34,9 @@ const PRESUPUESTO = 11 * 60_000;
 
 export const CODIGO = /^\d{4}-\d{4}-\d{4}$/;
 export const CREADOR = /^[a-z0-9_-]{1,32}$/;
+
+/** Lo que se pide a /pendientes: la vuelta entera, o solo lo forzado. */
+export const pedido = (forzadas) => (forzadas ? { forzadas: true } : {});
 
 /** El pase solo va al servicio de verdad, o a uno en local para probar. */
 export function destinoValido(url) {
@@ -180,12 +185,12 @@ async function leerJina(destino, turno, cuenta) {
 export async function principal() {
 	const t0 = Date.now();
 	if (!destinoValido(SERVICIO)) throw new Fallo("ISLAS_URL no es el servicio de islas ni uno en local: el pase no sale de aquí.");
-	const p = await alServicio("pendientes", {});
+	const p = await alServicio("pendientes", pedido(FORZADAS));
 	if (p.status !== 200 || !Array.isArray(p.j.islas) || !Array.isArray(p.j.creadores)) throw new Fallo(`El servicio no ha dado los pendientes (${p.status})${porQue(p.j)}.`);
 	const islas = p.j.islas.filter((c) => typeof c === "string" && CODIGO.test(c));
 	const creadores = p.j.creadores.filter((c) => typeof c === "string" && CREADOR.test(c));
 	const max = Number.isInteger(p.j.max_lote) && p.j.max_lote > 0 ? Math.min(p.j.max_lote, MAX_LOTE) : MAX_LOTE;
-	console.log(`Pendientes: ${islas.length} islas y ${creadores.length} creadores (lotes de ${max}${SECO ? ", en seco" : ""}).`);
+	console.log(`Pendientes${FORZADAS ? " forzadas" : ""}: ${islas.length} islas y ${creadores.length} creadores (lotes de ${max}${SECO ? ", en seco" : ""}).`);
 
 	const turno = ritmo(POR_MINUTO);
 	const cuenta = { leidas: 0, n429: 0, red: 0, otros: 0, sinTiempo: 0, grandes: 0 };
