@@ -241,7 +241,7 @@ tr.vacia td{color:var(--faint)}
 
 <script>
 const $ = id => document.getElementById(id);
-const state = { data: null, game: 0, stat: 0, live: {} };
+const state = { data: null, game: 0, stat: 0, live: {}, islas: new Map() };
 const SVG = {
   chev: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>',
   copy: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
@@ -265,6 +265,8 @@ const safeImg = u => /^https:\/\/cdn-\d+\.qstv\.on\.epicgames\.com\/[\w\/.-]+$/.
 const safeColor = c => /^#[0-9a-f]{6}$/i.test(String(c || '')) ? c : null;
 const islandCode = g => (g.island && /^\d{4}-\d{4}-\d{4}$/.test(g.island.code)) ? g.island.code : null;
 const islandUrl = code => 'https://fortnite.gg/island?code=' + code;
+/* Nombre, creador y miniatura no se guardan aquí: son del servicio de islas (islas.json). */
+const islaDe = g => state.islas.get(islandCode(g)) || {};
 const fmtN = n => Number(n).toLocaleString('es-ES');
 
 function parseUpdated(s) {
@@ -284,15 +286,14 @@ function relTime(d) {
 const localDate = d => d && !isNaN(d) ? d.toLocaleString('es-ES', { dateStyle: 'medium', timeStyle: 'short' }) : '';
 
 function thumbHtml(g) {
-  const isl = g.island || {};
-  const thumb = safeImg(isl.thumb);
+  const thumb = safeImg(islaDe(g).thumb_url);
   if (!thumb) return '<span class="thumb" aria-hidden="true">' + escapeHtml(g.emoji || '🎮') + '</span>';
   return '<span class="thumb" aria-hidden="true"><img src="' + thumb + '" alt="" loading="lazy" decoding="async"></span>';
 }
 
 /* ── Carpetas por creador; dentro, del mapa más nuevo al más viejo ── */
 const CREATOR_ORDER = ['dani280n2', 'sonoq', 'aidenomalley'];
-const creatorOf = g => (g.island && g.island.creator) || '';
+const creatorOf = g => islaDe(g).creator || '';
 function creatorGroups() {
   const by = new Map();
   state.data.games.forEach((g, i) => {
@@ -383,7 +384,7 @@ function render() {
 
 function renderHeader() {
   const g = state.data.games[state.game];
-  const isl = g.island || {};
+  const isl = islaDe(g);
   const code = islandCode(g);
   $('hdrThumb').innerHTML = thumbHtml(g);
   $('title').textContent = isl.name || g.name;
@@ -466,10 +467,10 @@ async function copyText(text, ok) {
   ok();
 }
 
-/* ── Jugadores en cada mapa ──
-   Del servicio común de islas de STONKS, que los lee de Epic cada 10 minutos
-   para todas las apps (con CORS abierto y 10 min de caché). Epic da el pico
-   de cada tramo de 10 min con 10-20 min de retraso, y null por debajo de 5. */
+/* ── Las islas: nombre, creador, miniatura y jugadores ──
+   Del servicio común de islas de STONKS, que lo lee para todas las apps (con
+   CORS abierto y 10 min de caché). Epic da el pico de cada tramo de 10 min
+   con 10-20 min de retraso, y null por debajo de 5. */
 const ISLAS = 'https://islas.stonksstudio.com/publico/islas.json';
 const PLAYERS_EVERY_MS = 10 * 60 * 1000;
 
@@ -495,11 +496,19 @@ function playersOf(isla) {
   return { now: p.now, under5: false, at: at && !isNaN(at) ? at : null };
 }
 
-async function refreshPlayers() {
+const fichaDe = i => i ? [i.name, i.creator, i.thumb_url].join('\u0000') : '';
+
+async function refreshIslas() {
   const j = await getJson(ISLAS);
-  const porCodigo = new Map(((j && j.islands) || []).map(i => [i.code, i]));
+  if (j && Array.isArray(j.islands)) {
+    const nuevas = new Map(j.islands.filter(i => i && typeof i.code === 'string').map(i => [i.code, i]));
+    // Solo se repinta si cambia lo que se ve: un repintado cada 10 min movería la página.
+    const cambia = state.data.games.some(g => fichaDe(state.islas.get(islandCode(g))) !== fichaDe(nuevas.get(islandCode(g))));
+    state.islas = nuevas;
+    if (cambia) render();
+  }
   state.data.games.forEach(g => {
-    const p = playersOf(porCodigo.get(islandCode(g)));
+    const p = playersOf(state.islas.get(islandCode(g)));
     if (p || !state.live[g.key]) state.live[g.key] = p || { none: true };
   });
   renderLive();
@@ -550,8 +559,8 @@ async function load() {
   $('boot').hidden = true;
   if (state.carga) state.carga.parar();
   render();
-  refreshPlayers();
-  setInterval(() => { if (!document.hidden) refreshPlayers(); }, PLAYERS_EVERY_MS);
+  refreshIslas();
+  setInterval(() => { if (!document.hidden) refreshIslas(); }, PLAYERS_EVERY_MS);
 }
 
 function bootMsg(msg) {
