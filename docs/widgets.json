@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-26 10:52 UTC",
+  "updated": "2026-10-26 17:12 UTC",
   "games": [
     {
       "key": "laser_for_brainrots",
@@ -68,7 +68,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-26 10:52 UTC"
+          "updated": "2026-10-26 17:12 UTC"
         },
         {
           "key": "cash",
@@ -127,7 +127,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-26 10:52 UTC"
+          "updated": "2026-10-26 17:12 UTC"
         }
       ]
     },
@@ -147,7 +147,7 @@
           "emoji": "💰",
           "color": "#ffde20",
           "rows": [],
-          "updated": "2026-10-26 10:52 UTC"
+          "updated": "2026-10-26 17:12 UTC"
         },
         {
           "key": "cash",
@@ -155,7 +155,7 @@
           "emoji": "💵",
           "color": "#00e10c",
           "rows": [],
-          "updated": "2026-10-26 10:52 UTC"
+          "updated": "2026-10-26 17:12 UTC"
         }
       ]
     },
@@ -191,7 +191,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-26 10:52 UTC"
+          "updated": "2026-10-26 17:12 UTC"
         },
         {
           "key": "cash",
@@ -215,7 +215,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-26 10:52 UTC"
+          "updated": "2026-10-26 17:12 UTC"
         }
       ]
     },
@@ -286,7 +286,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-26 10:52 UTC"
+          "updated": "2026-10-26 17:12 UTC"
         },
         {
           "key": "hay",
@@ -345,7 +345,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-26 10:52 UTC"
+          "updated": "2026-10-26 17:12 UTC"
         },
         {
           "key": "best_time",
@@ -404,7 +404,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-26 10:52 UTC"
+          "updated": "2026-10-26 17:12 UTC"
         }
       ]
     },
@@ -435,7 +435,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-26 10:52 UTC"
+          "updated": "2026-10-26 17:12 UTC"
         },
         {
           "key": "paintings",
@@ -459,7 +459,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-26 10:52 UTC"
+          "updated": "2026-10-26 17:12 UTC"
         },
         {
           "key": "keys",
@@ -478,7 +478,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-26 10:52 UTC"
+          "updated": "2026-10-26 17:12 UTC"
         },
         {
           "key": "best_time",
@@ -497,7 +497,7 @@
               "isVip": false
             }
           ],
-          "updated": "2026-10-26 10:52 UTC"
+          "updated": "2026-10-26 17:12 UTC"
         }
       ]
     }
