@@ -51,6 +51,26 @@ discord-stats-bot/
    python main.py
    ```
 
+## 🌐 Varios servidores de Discord
+
+El bot puede estar en varios servidores. Cada uno tiene sus canales
+(`📤︱submit-stats` y `🏆︱leaderboards`, que pueden llamarse igual en
+todos) y sus juegos. Todo se configura en `games.py`:
+
+1. **Servidor nuevo**: invita al bot (el mismo) y lanza el workflow a
+   mano. El log dice `Servidor sin dar de alta: '<nombre>' (ID <id>)`:
+   añádelo a `SERVIDORES` con una clave corta (`"mi_server": {"nombre":
+   ..., "guild_id": <id>}`). Hasta entonces el bot no toca ese servidor.
+2. **Juego nuevo**: copia un bloque de `GAMES` y pon `"servidor":
+   "mi_server"`. Sin `servidor`, el juego es de Stonks.
+
+Una captura solo cuenta en el servidor de su juego: el código de isla de
+un juego de otro servidor se rechaza como desconocido. Cada servidor
+lleva su propio puntero de mensajes en `bot_state`
+(`last_message:submit:<clave>`; el de Stonks conserva
+`last_message:submit`). Bloquear a un jugador (input `quitar`) lo saca
+de todos los juegos de todos los servidores.
+
 ## ☁️ Hosting
 
 Sube el repositorio a GitHub (el `.gitignore` ya protege el `.env`).

@@ -1,13 +1,15 @@
 """
 batch_update.py
 ================
-Bot por LOTES, multi-juego con UN único canal de envío.
+Bot por LOTES, multi-juego y multi-servidor: un canal de envío por
+servidor de Discord (SERVIDORES en games.py).
 
 Cada ejecución (manual desde GitHub Actions o por cron):
 
-  1. Conecta a Discord y localiza los 3 canales (submit, leaderboards,
-     summary). Aborta si falta alguno.
-  2. Lee del canal de envío los mensajes nuevos desde el último puntero.
+  1. Conecta a Discord y, en cada servidor dado de alta, localiza sus
+     canales de envío y de leaderboards. Un servidor al que le falte
+     alguno se salta; los demás siguen.
+  2. Lee de cada canal de envío los mensajes nuevos desde su puntero.
   3. Por cada captura nueva:
        - Pasa la imagen a Gemini (esquema universal).
        - Identifica el juego por el código de isla.
@@ -17,9 +19,8 @@ Cada ejecución (manual desde GitHub Actions o por cron):
          jugador con la confirmación.
      Antes, si un moderador lo pide (input 'quitar'), saca de la
      leaderboard al autor de una captura falsa y lo bloquea.
-  4. Refresca un EMBED por juego en el canal de leaderboards.
-  5. Refresca un mensaje con .json adjunto por juego en el canal de
-     resumen para moderadores.
+  4. Refresca un EMBED por juego en el canal de leaderboards de su
+     servidor.
 
 Al terminar cierra la conexión.
 """
@@ -35,11 +36,11 @@ from database import (
     bloquear_jugador,
     borrar_jugador,
     guardar_stat,
-    guardar_ultimo_mensaje_global,
+    guardar_ultimo_mensaje,
     guardar_id_embed,
     obtener_id_embed,
     obtener_top,
-    obtener_ultimo_mensaje_global,
+    obtener_ultimo_mensaje,
     añadir_pendiente,
     listar_bloqueados,
     listar_pendientes,
@@ -48,8 +49,9 @@ from database import (
 from formatting import format_value, parse_value
 from games import (
     GAMES,
-    LEADERBOARD_CHANNEL,
-    SUBMIT_CHANNEL,
+    SERVIDORES,
+    canal_envio,
+    canal_leaderboards,
     game_enabled,
     get_game_by_island_code,
     stat_field,
@@ -152,10 +154,10 @@ def _tiene_parentesis(texto: str) -> bool:
 
 
 def _resolver_canal(
-    todos: list[discord.TextChannel], nombre: str
+    guild: discord.Guild, nombre: str
 ) -> tuple[discord.TextChannel | None, str | None]:
-    """Localiza un canal por nombre. Detecta duplicados."""
-    coincidencias = [ch for ch in todos if ch.name == nombre]
+    """Localiza un canal por nombre dentro de un servidor. Detecta duplicados."""
+    coincidencias = [ch for ch in guild.text_channels if ch.name == nombre]
     if len(coincidencias) == 0:
         return None, None
     if len(coincidencias) > 1:
@@ -167,9 +169,9 @@ def _resolver_canal(
 # =====================================================================
 #  PROCESADO DE UNA CAPTURA
 # =====================================================================
-async def _procesar_mensaje(message: discord.Message) -> str | None:
+async def _procesar_mensaje(message: discord.Message, servidor: str) -> str | None:
     """
-    Procesa UN mensaje con imagen del canal de envío.
+    Procesa UN mensaje con imagen del canal de envío del servidor dado.
     Devuelve la clave del juego al que se asignó (para saber qué embeds
     refrescar al final), o None si se rechazó.
     """
@@ -212,6 +214,13 @@ async def _procesar_mensaje(message: discord.Message) -> str | None:
     # se enviaron sin el código visible.
     forzado = JUEGO_FORZADO.get(str(message.id))
     if forzado:
+        if GAMES[forzado]["servidor"] != servidor:
+            print(
+                f"[WARN] msg {message.id}: el juego forzado '{forzado}' es del "
+                f"servidor '{GAMES[forzado]['servidor']}' y la captura de "
+                f"'{servidor}'. La ignoro."
+            )
+            return None
         print(f"[INFO] msg {message.id}: juego forzado a mano -> '{forzado}'.")
         juego = (forzado, GAMES[forzado])
     else:
@@ -229,6 +238,14 @@ async def _procesar_mensaje(message: discord.Message) -> str | None:
         juego = get_game_by_island_code(codigo_leido)
         if juego is None:
             print(f"[INFO] msg {message.id}: código '{codigo_leido}' no corresponde a ningún juego configurado.")
+            await _rechazar(message, "island_code_unknown")
+            return None
+        if juego[1]["servidor"] != servidor:
+            # Juego de otro servidor: aquí no tiene leaderboard.
+            print(
+                f"[INFO] msg {message.id}: código '{codigo_leido}' es de "
+                f"'{juego[0]}', del servidor '{juego[1]['servidor']}', no de '{servidor}'."
+            )
             await _rechazar(message, "island_code_unknown")
             return None
 
@@ -439,25 +456,48 @@ def _ids_a_quitar() -> list[str]:
     return salida
 
 
-async def _quitar_jugadores(c_submit: discord.TextChannel) -> None:
+async def _buscar_mensaje(
+    envios: dict[str, discord.TextChannel], message_id: str
+) -> tuple[str, discord.Message] | None:
+    """
+    Busca un mensaje en los canales de envío de todos los servidores.
+    Devuelve (servidor, mensaje), o None si no está en ninguno. Un error
+    que no sea "no existe" se propaga para no darlo por borrado.
+    """
+    error = None
+    for servidor, canal in envios.items():
+        try:
+            return servidor, await canal.fetch_message(int(message_id))
+        except discord.NotFound:
+            continue
+        except discord.HTTPException as e:
+            error = e
+    if error is not None:
+        raise error
+    return None
+
+
+async def _quitar_jugadores(envios: dict[str, discord.TextChannel]) -> None:
     """
     Por cada captura falsa pedida: saca a su autor de la leaderboard
-    (todos los juegos y stats) y lo bloquea para que sus capturas se
-    ignoren siempre. No responde nada en Discord.
+    (todos los juegos y stats, de todos los servidores) y lo bloquea
+    para que sus capturas se ignoren siempre. No responde nada en Discord.
     """
     for ref in _ids_a_quitar():
         try:
-            message = await c_submit.fetch_message(int(ref))
-            # Enlace a la respuesta del bot en vez de a la captura: vamos
-            # al mensaje original al que respondió.
-            if message.author == client.user and message.reference:
-                message = await c_submit.fetch_message(message.reference.message_id)
-            discord_id = str(message.author.id)
-            print(f"[QUITAR] msg {ref}: autor {message.author} ({discord_id}).")
-        except discord.NotFound:
-            # El mensaje no está (borrado al banear) o es un ID de usuario.
-            discord_id = ref
-            print(f"[QUITAR] {ref} no es un mensaje de #{SUBMIT_CHANNEL}; lo trato como ID de jugador.")
+            encontrado = await _buscar_mensaje(envios, ref)
+            if encontrado is None:
+                # El mensaje no está (borrado al banear) o es un ID de usuario.
+                discord_id = ref
+                print(f"[QUITAR] {ref} no es un mensaje de ningún canal de envío; lo trato como ID de jugador.")
+            else:
+                servidor, message = encontrado
+                # Enlace a la respuesta del bot en vez de a la captura: vamos
+                # al mensaje original al que respondió.
+                if message.author == client.user and message.reference:
+                    message = await envios[servidor].fetch_message(message.reference.message_id)
+                discord_id = str(message.author.id)
+                print(f"[QUITAR] msg {ref} ({servidor}): autor {message.author} ({discord_id}).")
         except discord.HTTPException as e:
             print(f"[WARN] quitar: no pude recuperar {ref}: {e}. Lo salto.")
             continue
@@ -482,12 +522,12 @@ MAX_PASADAS_PENDIENTE = 5
 
 
 async def _procesar_cola_pendientes(
-    c_submit: discord.TextChannel, juegos_tocados: set[str]
+    envios: dict[str, discord.TextChannel], juegos_tocados: set[str]
 ) -> None:
     """
     Reintenta las capturas que quedaron en cola por errores transitorios
     de Gemini en pasadas anteriores. Por cada una:
-      - La recupera del canal por su ID.
+      - La busca por su ID en los canales de envío de los servidores.
       - Intenta procesarla de nuevo.
       - Si funciona: la quita de la cola y marca el juego para refrescar.
       - Si vuelve a fallar por Gemini: incrementa su contador; si llega a
@@ -498,24 +538,32 @@ async def _procesar_cola_pendientes(
     if not pendientes:
         return
 
+    # Si algún servidor no está disponible en esta pasada, un mensaje que
+    # no aparezca puede ser suyo: no se da por borrado.
+    todos_los_servidores = len(envios) == len(SERVIDORES)
+
     print(f"[QUEUE] {len(pendientes)} captura(s) pendiente(s) por reintentar.")
     for message_id, intentos in pendientes:
         try:
-            message = await c_submit.fetch_message(int(message_id))
-        except discord.NotFound:
-            print(f"[QUEUE] msg {message_id} ya no existe; lo saco de la cola.")
-            await quitar_pendiente(message_id)
-            continue
+            encontrado = await _buscar_mensaje(envios, message_id)
         except discord.HTTPException as e:
             print(f"[QUEUE] No pude recuperar msg {message_id}: {e}. Lo dejo en cola.")
             continue
+        if encontrado is None:
+            if todos_los_servidores:
+                print(f"[QUEUE] msg {message_id} ya no existe; lo saco de la cola.")
+                await quitar_pendiente(message_id)
+            else:
+                print(f"[QUEUE] msg {message_id} no aparece y falta algún servidor; lo dejo en cola.")
+            continue
+        servidor, message = encontrado
 
         if not message.attachments:
             await quitar_pendiente(message_id)
             continue
 
         try:
-            game_key = await _procesar_mensaje(message)
+            game_key = await _procesar_mensaje(message, servidor)
         except GeminiTransientError as e:
             nuevos_intentos = intentos + 1
             if nuevos_intentos >= MAX_PASADAS_PENDIENTE:
@@ -632,49 +680,44 @@ async def _actualizar_embed(
 async def on_ready():
     print(f"[BATCH] Conectado como {client.user}")
     try:
-        canales_texto = [
-            ch for ch in client.get_all_channels()
-            if isinstance(ch, discord.TextChannel)
-        ]
-
-        # --- Resolver los 3 canales ---
-        c_submit, err = _resolver_canal(canales_texto, SUBMIT_CHANNEL)
-        if err or c_submit is None:
-            print(f"[FATAL] Canal de envío #{SUBMIT_CHANNEL}: {err or 'no encontrado'}.")
-            return
-
-        c_leaderboard, err = _resolver_canal(canales_texto, LEADERBOARD_CHANNEL)
-        if err or c_leaderboard is None:
-            print(f"[FATAL] Canal de leaderboards #{LEADERBOARD_CHANNEL}: {err or 'no encontrado'}.")
-            return
-
-        # --- Avisos de permisos ---
-        p_lb = c_leaderboard.permissions_for(c_leaderboard.guild.me)
-        if not p_lb.send_messages:
-            print(f"[WARN] Sin 'Send Messages' en #{LEADERBOARD_CHANNEL}.")
-
-        # --- Leer mensajes nuevos del canal de envío ---
-        ultimo_id = await obtener_ultimo_mensaje_global()
-        if ultimo_id is None:
-            print(f"[BATCH] Primera ejecución: últimos {BACKFILL_PRIMERA_VEZ} mensajes.")
-            recientes = [
-                m async for m in c_submit.history(
-                    limit=BACKFILL_PRIMERA_VEZ, oldest_first=False
+        # --- Resolver los canales de cada servidor ---
+        # envios / leaderboards: {servidor: canal} de los que están bien.
+        envios: dict[str, discord.TextChannel] = {}
+        leaderboards: dict[str, discord.TextChannel] = {}
+        dados_de_alta = {cfg["guild_id"] for cfg in SERVIDORES.values()}
+        for guild in client.guilds:
+            if guild.id not in dados_de_alta:
+                print(
+                    f"[INFO] Servidor sin dar de alta: '{guild.name}' (ID {guild.id}). "
+                    f"Lo ignoro; para usarlo, añádelo a SERVIDORES en games.py."
                 )
-            ]
-            mensajes = list(reversed(recientes))
-        else:
-            despues_de = discord.Object(id=int(ultimo_id))
-            mensajes = [
-                m async for m in c_submit.history(
-                    limit=MAX_POR_EJECUCION, after=despues_de, oldest_first=True
-                )
-            ]
+        for servidor, cfg in SERVIDORES.items():
+            guild = client.get_guild(cfg["guild_id"])
+            if guild is None:
+                print(f"[ERROR] {servidor}: el bot no está en el servidor {cfg['guild_id']}. Lo salto.")
+                continue
+            c_submit, err = _resolver_canal(guild, canal_envio(servidor))
+            if err or c_submit is None:
+                print(f"[ERROR] {servidor}: canal de envío #{canal_envio(servidor)}: {err or 'no encontrado'}. Lo salto.")
+                continue
+            c_leaderboard, err = _resolver_canal(guild, canal_leaderboards(servidor))
+            if err or c_leaderboard is None:
+                print(f"[ERROR] {servidor}: canal de leaderboards #{canal_leaderboards(servidor)}: {err or 'no encontrado'}. Lo salto.")
+                continue
+            if not c_leaderboard.permissions_for(guild.me).send_messages:
+                print(f"[WARN] {servidor}: sin 'Send Messages' en #{c_leaderboard.name}.")
+            envios[servidor] = c_submit
+            leaderboards[servidor] = c_leaderboard
+            print(f"[BATCH] {servidor}: '{guild.name}' listo.")
+
+        if not envios:
+            print("[FATAL] Ningún servidor tiene sus canales; no hago nada.")
+            return
 
         # --- Capturas falsas: sacar y bloquear a sus autores ANTES de
         #     procesar nada, para que no se cuele ninguna otra suya.
         BLOQUEADOS.update(await listar_bloqueados())
-        await _quitar_jugadores(c_submit)
+        await _quitar_jugadores(envios)
 
         # --- Procesar la COLA de pendientes primero (capturas que
         #     fallaron por errores transitorios de Gemini en pasadas
@@ -695,10 +738,31 @@ async def on_ready():
             DATOS_MANUALES[mid] = stats
             print(f"[QUEUE] msg {mid} añadida a mano con sus datos (juego: {juego}).")
             await añadir_pendiente(mid, intentos=1)
-        await _procesar_cola_pendientes(c_submit, juegos_tocados)
+        await _procesar_cola_pendientes(envios, juegos_tocados)
 
-        # --- Procesar cada captura NUEVA y trackear qué juegos refrescar ---
-        if mensajes:
+        # --- Procesar cada captura NUEVA de cada servidor ---
+        for servidor, c_submit in envios.items():
+            ultimo_id = await obtener_ultimo_mensaje(servidor)
+            if ultimo_id is None:
+                print(f"[BATCH] {servidor}: primera ejecución, últimos {BACKFILL_PRIMERA_VEZ} mensajes.")
+                recientes = [
+                    m async for m in c_submit.history(
+                        limit=BACKFILL_PRIMERA_VEZ, oldest_first=False
+                    )
+                ]
+                mensajes = list(reversed(recientes))
+            else:
+                despues_de = discord.Object(id=int(ultimo_id))
+                mensajes = [
+                    m async for m in c_submit.history(
+                        limit=MAX_POR_EJECUCION, after=despues_de, oldest_first=True
+                    )
+                ]
+
+            if not mensajes:
+                print(f"[BATCH] {servidor}: no hay mensajes nuevos.")
+                continue
+
             for message in mensajes:
                 if message.author == client.user:
                     continue
@@ -707,7 +771,7 @@ async def on_ready():
                 if str(message.id) in PROCESADOS_EN_COLA:
                     continue
                 try:
-                    game_key = await _procesar_mensaje(message)
+                    game_key = await _procesar_mensaje(message, servidor)
                 except GeminiTransientError as e:
                     # Gemini sobrecargado: encolar para la próxima pasada,
                     # sin avisar al usuario. El puntero igual avanza.
@@ -718,10 +782,8 @@ async def on_ready():
                     juegos_tocados.add(game_key)
 
             id_mas_reciente = max(m.id for m in mensajes)
-            await guardar_ultimo_mensaje_global(str(id_mas_reciente))
-            print(f"[BATCH] {len(mensajes)} mensajes revisados. Puntero -> {id_mas_reciente}")
-        else:
-            print("[BATCH] No hay mensajes nuevos.")
+            await guardar_ultimo_mensaje(servidor, str(id_mas_reciente))
+            print(f"[BATCH] {servidor}: {len(mensajes)} mensajes revisados. Puntero -> {id_mas_reciente}")
 
         # --- Refrescar embeds y resúmenes ---
         # Política:
@@ -733,7 +795,7 @@ async def on_ready():
         es_manual = os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch"
 
         if es_manual:
-            a_refrescar = set(GAMES.keys())
+            a_refrescar = {k for k, cfg in GAMES.items() if cfg["servidor"] in leaderboards}
             print(
                 "[BATCH] Ejecución MANUAL: refresco TODOS los embeds "
                 f"desde la base de datos ({sorted(a_refrescar)})."
@@ -757,7 +819,7 @@ async def on_ready():
         for game_key in a_refrescar:
             game_config = GAMES[game_key]
             try:
-                await _actualizar_embed(c_leaderboard, game_key, game_config)
+                await _actualizar_embed(leaderboards[game_config["servidor"]], game_key, game_config)
             except Exception as e:
                 print(f"[ERROR] Embed de '{game_key}': {e}")
 

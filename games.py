@@ -5,16 +5,21 @@ CONFIGURACIÓN DE JUEGOS.
 
 Este es el ÚNICO archivo que tienes que tocar para añadir o quitar juegos.
 
-ARQUITECTURA DE CANALES (única para todos los juegos):
-  - SUBMIT_CHANNEL:    canal compartido donde los jugadores suben todas
-                       las capturas. El bot identifica el juego por el
-                       CÓDIGO DE ISLA que lea en la imagen.
+SERVIDORES Y CANALES:
+  El bot puede estar en varios servidores de Discord (SERVIDORES). Cada
+  uno tiene sus propios canales, que se buscan por nombre SOLO dentro de
+  ese servidor (dos servidores pueden tener canales con el mismo nombre):
+  - SUBMIT_CHANNEL:    canal donde los jugadores suben las capturas. El
+                       bot identifica el juego por el CÓDIGO DE ISLA que
+                       lea en la imagen, entre los juegos de ese servidor.
   - LEADERBOARD_CHANNEL: canal público de solo lectura donde el bot
                        publica/edita un embed por juego con sus rankings.
-  - SUMMARY_CHANNEL:   canal privado de moderadores con los .json de
-                       respaldo (un archivo adjunto por juego).
+  Un servidor en el que esté el bot pero que no esté en SERVIDORES se
+  ignora (el log dice su nombre y su ID para darlo de alta).
 
 Cada juego se describe con:
+  - servidor:      clave de SERVIDORES donde está su leaderboard
+                   (si no se pone, "stonks").
   - display_name:  cómo aparece en los mensajes del bot.
   - island_code:   código de isla esperado (sirve para identificar el
                    juego al recibir una captura).
@@ -30,12 +35,27 @@ Para añadir un juego nuevo: copia un bloque y modifícalo.
 """
 
 # ---------------------------------------------------------------------
-# Canales (nombres EXACTOS de Discord; copia y pega desde Discord si
-# llevan caracteres especiales como '︱' U+FE31).
+# Servidores de Discord. Clave interna -> ID del servidor (guild) y,
+# si sus canales se llaman distinto, sus nombres ("canal_envio",
+# "canal_leaderboards"). Para dar de alta uno: invita al bot, lanza el
+# workflow y copia el ID que sale en el log ("servidor sin dar de alta").
+# ---------------------------------------------------------------------
+SERVIDORES: dict[str, dict] = {
+    "stonks": {
+        "nombre": "Stonks Studio",
+        "guild_id": 1509322823837945887,
+    },
+}
+
+# Servidor de los juegos que no dicen el suyo.
+SERVIDOR_POR_DEFECTO = "stonks"
+
+# ---------------------------------------------------------------------
+# Canales por defecto (nombres EXACTOS de Discord; copia y pega desde
+# Discord si llevan caracteres especiales como '︱' U+FE31).
 # ---------------------------------------------------------------------
 SUBMIT_CHANNEL = "📤︱submit-stats"
 LEADERBOARD_CHANNEL = "🏆︱leaderboards"
-SUMMARY_CHANNEL = "📊︱leaderboard-data"
 
 
 # ---------------------------------------------------------------------
@@ -385,9 +405,26 @@ GAMES: dict[str, dict] = {
 }
 
 
-# Inyecta automáticamente la descripción del código de isla en cada juego.
-for _cfg in GAMES.values():
+# Inyecta automáticamente la descripción del código de isla y el
+# servidor por defecto en cada juego.
+for _key, _cfg in GAMES.items():
     _cfg.setdefault("island_code_description", ISLAND_CODE_DESC)
+    _cfg.setdefault("servidor", SERVIDOR_POR_DEFECTO)
+    if _cfg["servidor"] not in SERVIDORES:
+        raise ValueError(
+            f"games.py: el juego '{_key}' dice servidor '{_cfg['servidor']}', "
+            f"que no está en SERVIDORES ({sorted(SERVIDORES)})."
+        )
+
+
+def canal_envio(servidor: str) -> str:
+    """Nombre del canal de capturas del servidor."""
+    return SERVIDORES[servidor].get("canal_envio", SUBMIT_CHANNEL)
+
+
+def canal_leaderboards(servidor: str) -> str:
+    """Nombre del canal de leaderboards del servidor."""
+    return SERVIDORES[servidor].get("canal_leaderboards", LEADERBOARD_CHANNEL)
 
 
 def _normalizar_codigo(texto: str) -> str:
@@ -399,7 +436,8 @@ def get_game_by_island_code(island_code: str) -> tuple[str, dict] | None:
     """
     Devuelve (clave_interna, config) del juego cuyo código de isla
     coincide con el dado. La comparación es por dígitos (tolerante a
-    paréntesis, guiones y espacios).
+    paréntesis, guiones y espacios). Puede ser de cualquier servidor:
+    quien llama comprueba que es del servidor de la captura.
     """
     objetivo = _normalizar_codigo(island_code)
     if not objetivo:
