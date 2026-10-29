@@ -22,12 +22,9 @@ on:
         required: false
         default: false
 
-  # Programado: cada hora en punto (UTC).
-  # Cambia el patrón si quieres otra frecuencia:
-  #   "*/30 * * * *"  -> cada 30 minutos
-  #   "0 */6 * * *"   -> cada 6 horas
-  schedule:
-    - cron: "0 * * * *"
+  # Sin cron desde el 29/10/2026: las leaderboards las lleva la app nueva,
+  # stonks-ecosistema/leaderboards (leaderboards.stonksstudio.com). Este
+  # workflow queda solo a mano, por si hiciera falta volver atrás.
 
 # Evita ejecuciones solapadas (manual + programada).
 concurrency:
