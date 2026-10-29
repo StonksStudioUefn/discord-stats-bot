@@ -303,14 +303,20 @@ async def listar_bloqueados() -> set[str]:
 
 
 # Helpers semánticos para que batch_update.py se lea mejor.
-# Ahora SOLO hay un canal de envío, así que el "último mensaje
-# procesado" es un único valor global (no por juego).
-async def obtener_ultimo_mensaje_global() -> str | None:
-    return await state_get("last_message:submit")
+# Un "último mensaje procesado" por servidor (uno por canal de envío).
+# El de Stonks conserva la clave de cuando solo había un servidor.
+def _clave_puntero(servidor: str) -> str:
+    if servidor == "stonks":
+        return "last_message:submit"
+    return f"last_message:submit:{servidor}"
 
 
-async def guardar_ultimo_mensaje_global(message_id: str) -> None:
-    return await state_set("last_message:submit", message_id)
+async def obtener_ultimo_mensaje(servidor: str) -> str | None:
+    return await state_get(_clave_puntero(servidor))
+
+
+async def guardar_ultimo_mensaje(servidor: str, message_id: str) -> None:
+    return await state_set(_clave_puntero(servidor), message_id)
 
 
 # Mensaje (embed) del juego en el canal de leaderboards. No está fijado,
