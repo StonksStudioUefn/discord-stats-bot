@@ -4,10 +4,7 @@ fortnite_gg.py
 El código de isla de cada juego y su enlace a fortnite.gg.
 
 El nombre, el creador, la miniatura y los jugadores no se guardan en el bot:
-son del servicio común de islas de STONKS (Oscar, 25/10/2026), y la web los
-lee al abrirse de https://islas.stonksstudio.com/publico/islas.json. Las
-islas tienen que estar registradas como públicas en el servicio
-(islas.registrar del conector STONKS, app «bot»).
+son del servicio común de islas de STONKS (Oscar, 25/10/2026).
 """
 
 import re

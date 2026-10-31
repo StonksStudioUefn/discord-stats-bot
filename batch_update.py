@@ -58,7 +58,6 @@ from games import (
     stat_lower_is_better,
 )
 from gemini_service import GeminiTransientError, extract_stats_from_image
-from widget_site import generar_widgets_json
 
 
 # Mensajes a mirar en la primera ejecución (cuando no hay puntero previo).
@@ -822,16 +821,6 @@ async def on_ready():
                 await _actualizar_embed(leaderboards[game_config["servidor"]], game_key, game_config)
             except Exception as e:
                 print(f"[ERROR] Embed de '{game_key}': {e}")
-
-        # --- Generar el JSON de widgets para la web ---
-        # Se regenera siempre que haya habido algún refresco (manual o
-        # con juegos cambiados), porque el JSON es global (todos los
-        # juegos en un archivo). Si nada cambió, no hace falta tocarlo.
-        if a_refrescar:
-            try:
-                await generar_widgets_json(obtener_top)
-            except Exception as e:
-                print(f"[ERROR] Generando widgets.json: {e}")
 
     finally:
         await client.close()
